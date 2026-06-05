@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette - Premium Forest Green & Ivory (Light Mode) */
-  --bg-main: #fbfaf7;
-  --bg-gradient: linear-gradient(135deg, #f7f5ef 0%, #fbfaf7 60%, #f1f5f2 100%);
-  --panel-bg: rgba(255, 255, 255, 0.85);
-  --panel-border: rgba(27, 67, 50, 0.08);
-  --panel-border-glow: rgba(27, 67, 50, 0.15);
+  /* Color Palette - Premium Rustic & Organic Theme (Light Mode) */
+  --bg-main: #faf8f5;
+  --bg-gradient: linear-gradient(135deg, #f4f1e6 0%, #faf8f5 60%, #ebe7d8 100%);
+  --panel-bg: rgba(255, 255, 255, 0.92);
+  --panel-border: rgba(96, 108, 56, 0.12);
+  --panel-border-glow: rgba(96, 108, 56, 0.25);
   
-  --color-strawberry: #1b4332; /* primary forest green */
-  --color-strawberry-hover: #2d6a4f; /* lighter leaf green */
-  --color-blueberry: #2563eb;
-  --color-blueberry-dark: #1d4ed8;
-  --color-raspberry: #9d1e49;
-  --color-blackberry: #4c1d95;
+  --color-strawberry: #606c38; /* primary muted olive green */
+  --color-strawberry-hover: #4a572a; /* darker olive green */
+  --color-blueberry: #587b7f; /* slate sage blue */
+  --color-blueberry-dark: #3c5c60;
+  --color-raspberry: #bc6c25; /* clay terracotta */
+  --color-blackberry: #784f41; /* wood bark brown */
   
-  --color-success: #2d6a4f;
-  --color-warning: #d97706;
-  --color-danger: #b91c1c;
+  --color-success: #606c38;
+  --color-warning: #dda15e; /* warm sand yellow */
+  --color-danger: #b05012; /* terracotta */
   
-  --text-primary: #111c17; /* dark forest charcoal for text */
-  --text-secondary: #3f4f46; /* medium olive slate */
-  --text-muted: #7a8c82; /* muted green gray */
+  --text-primary: #283618; /* dark forest charcoal/green for high contrast text */
+  --text-secondary: #4a572a; /* slate olive */
+  --text-muted: #8f9e8b; /* muted sage gray */
   
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-title: 'Outfit', sans-serif;
@@ -29,9 +29,9 @@
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
-  --shadow-glow-strawberry: 0 8px 30px rgba(27, 67, 50, 0.06);
-  --shadow-glow-success: 0 8px 30px rgba(45, 106, 79, 0.06);
-  --shadow-glow-blue: 0 8px 30px rgba(37, 99, 235, 0.06);
+  --shadow-glow-strawberry: 0 8px 30px rgba(96, 108, 56, 0.08);
+  --shadow-glow-success: 0 8px 30px rgba(96, 108, 56, 0.08);
+  --shadow-glow-blue: 0 8px 30px rgba(88, 123, 127, 0.08);
 }
 
 * {
@@ -167,7 +167,7 @@ h1 {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  border-color: rgba(27, 67, 50, 0.3);
+  border-color: rgba(96, 108, 56, 0.3);
   box-shadow: var(--shadow-glow-strawberry);
 }
 
@@ -184,7 +184,7 @@ h1 {
   align-items: center;
   gap: 8px;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 12px rgba(27, 67, 50, 0.15);
+  box-shadow: 0 4px 12px rgba(96, 108, 56, 0.15);
 }
 
 .btn-primary:hover {
@@ -236,7 +236,7 @@ h1 {
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
   border-color: var(--color-strawberry);
-  box-shadow: 0 0 0 2px rgba(27, 67, 50, 0.15);
+  box-shadow: 0 0 0 2px rgba(96, 108, 56, 0.15);
 }
 
 /* Pulsing Status Dot */
@@ -370,8 +370,8 @@ h1 {
 
 .landing-card:hover {
   transform: translateY(-5px);
-  border-color: rgba(27, 67, 50, 0.3);
-  box-shadow: 0 10px 30px rgba(27, 67, 50, 0.05);
+  border-color: rgba(96, 108, 56, 0.3);
+  box-shadow: 0 10px 30px rgba(96, 108, 56, 0.05);
 }
 
 .landing-card-blue:hover {
@@ -385,7 +385,7 @@ h1 {
   right: -10%;
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(27, 67, 50, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+  background: radial-gradient(circle, rgba(96, 108, 56, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
   z-index: -1;
   pointer-events: none;
 }

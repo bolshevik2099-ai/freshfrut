@@ -75,7 +75,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
                 gap: '12px',
                 width: '100%',
                 padding: '12px 16px',
-                background: isActive ? 'rgba(27, 67, 50, 0.08)' : 'transparent',
+                background: isActive ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
                 color: isActive ? 'var(--color-strawberry-hover)' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '12px',
