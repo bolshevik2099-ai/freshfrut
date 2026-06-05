@@ -455,6 +455,16 @@ function App() {
     if (error) console.error("Error updating debt fields:", error);
   };
 
+  // --- Delete Debt Handler ---
+  const deleteDebt = async (id) => {
+    if (confirm(`¿Estás seguro de eliminar esta cuenta/deuda ${id}?`)) {
+      setDebts(prev => prev.filter(d => d.id !== id));
+      const { error } = await supabase.from('debts').delete().eq('id', id);
+      if (error) console.error("Error deleting debt:", error);
+    }
+  };
+
+
   // --- CRUD Expenses ---
   const addExpense = async (newExpense) => {
     setExpenses(prev => [newExpense, ...prev]);
@@ -551,6 +561,7 @@ function App() {
             debts={debts} 
             registerDebtPayment={registerDebtPayment} 
             editDebt={editDebt}
+            deleteDebt={deleteDebt}
             suppliers={suppliers} 
             clients={clients} 
           />

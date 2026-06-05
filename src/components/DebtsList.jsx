@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { DollarSign, ArrowUpRight, ArrowDownRight, User, Calendar, CreditCard, CheckCircle, X, Filter, Eye, Edit2 } from 'lucide-react';
+import { DollarSign, ArrowUpRight, ArrowDownRight, User, Calendar, CreditCard, CheckCircle, X, Filter, Eye, Edit2, Trash2 } from 'lucide-react';
 
-export default function DebtsList({ debts, registerDebtPayment, editDebt, suppliers, clients }) {
+export default function DebtsList({ debts, registerDebtPayment, editDebt, deleteDebt, suppliers, clients }) {
   const [activeDebtType, setActiveDebtType] = useState('RECEIVABLE'); // 'RECEIVABLE' (A Favor) or 'PAYABLE' (En Contra)
   const [selectedEntity, setSelectedEntity] = useState('ALL');
   const [selectedStatus, setSelectedStatus] = useState('ALL');
@@ -472,6 +472,14 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, suppli
                           title="Editar"
                         >
                           <Edit2 size={14} />
+                        </button>
+                        <button
+                          onClick={() => deleteDebt(d.id)}
+                          className="btn-secondary"
+                          style={{ padding: '6px', borderRadius: '6px', color: 'var(--color-strawberry)' }}
+                          title="Eliminar Cuenta"
+                        >
+                          <Trash2 size={14} />
                         </button>
                         {d.remainingAmount > 0 ? (
                           <>

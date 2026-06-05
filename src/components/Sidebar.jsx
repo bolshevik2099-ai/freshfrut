@@ -54,7 +54,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         </div>
         <div>
           <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
-            Berry<span style={{ color: 'var(--color-strawberry)' }}>Export</span>
+            Fresh<span style={{ color: 'var(--color-strawberry)' }}>Frut</span>
           </h2>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>SISTEMA DE GESTIÓN</p>
         </div>
