@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Users, DollarSign, Wallet } from 'lucide-react';
+import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Users, DollarSign, Wallet, LogOut } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
   const menuItems = [
     { id: 'dashboard', label: 'Panel de Control', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventario', icon: PackageOpen },
@@ -105,6 +105,32 @@ export default function Sidebar({ activeTab, setActiveTab }) {
         flexDirection: 'column',
         gap: '12px'
       }}>
+        <button
+          onClick={onLogout}
+          className="sidebar-item-hover"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            width: '100%',
+            padding: '10px 16px',
+            background: 'rgba(239, 68, 68, 0.05)',
+            color: 'var(--color-danger)',
+            border: '1px solid rgba(239, 68, 68, 0.1)',
+            borderRadius: '10px',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            textAlign: 'left',
+            transition: 'all var(--transition-fast)',
+            marginBottom: '8px'
+          }}
+        >
+          <LogOut size={16} />
+          Cerrar Sesión
+        </button>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div className="pulse-dot"></div>
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>

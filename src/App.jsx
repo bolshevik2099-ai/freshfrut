@@ -11,12 +11,17 @@ import SuppliersList from './components/SuppliersList';
 import ClientsList from './components/ClientsList';
 import DebtsList from './components/DebtsList';
 import ExpensesList from './components/ExpensesList';
+import LandingPage from './components/LandingPage';
+import LoginPage from './components/LoginPage';
 
 
 
 
 
 function App() {
+  const [currentView, setCurrentView] = useState(() => {
+    return localStorage.getItem('freshfrut_session') === 'active' ? 'admin' : 'landing';
+  });
   const [activeTab, setActiveTab] = useState('dashboard');
   const [purchases, setPurchases] = useState([]);
   const [sales, setSales] = useState([]);
@@ -24,6 +29,16 @@ function App() {
   const [clients, setClients] = useState([]);
   const [debts, setDebts] = useState([]);
   const [expenses, setExpenses] = useState([]);
+
+  const handleLogin = (email, password) => {
+    localStorage.setItem('freshfrut_session', 'active');
+    setCurrentView('admin');
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('freshfrut_session');
+    setCurrentView('landing');
+  };
 
   // Load initial data from Supabase
   useEffect(() => {
@@ -486,10 +501,18 @@ function App() {
     }
   };
 
+  if (currentView === 'landing') {
+    return <LandingPage onNavigateToLogin={() => setCurrentView('login')} purchases={purchases} />;
+  }
+
+  if (currentView === 'login') {
+    return <LoginPage onLogin={handleLogin} onBack={() => setCurrentView('landing')} />;
+  }
+
   return (
     <div className="app-container">
       {/* Sidebar Navigation */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
 
       {/* Main Panel Content */}
       <main className="main-content">
