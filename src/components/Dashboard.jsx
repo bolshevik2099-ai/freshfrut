@@ -187,7 +187,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(225, 29, 72, 0.1)',
+            background: 'rgba(5, 150, 105, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -196,7 +196,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <Calendar size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', margin: 0, color: 'white' }}>Período de Análisis</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>Período de Análisis</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
               {filterStart && filterEnd ? `Mostrando datos del ${filterStart} al ${filterEnd}` : 'Mostrando todo el historial de datos'}
             </p>
@@ -253,7 +253,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Fruta Ingresada (Compras)
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(225, 29, 72, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--color-strawberry)' }}>
               <ShoppingCart size={20} />
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             {totalKgsReceived.toLocaleString()} kg
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Inversión: <strong style={{ color: 'white' }}>${totalCost.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
+            Inversión: <strong style={{ color: 'var(--text-primary)' }}>${totalCost.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
           </p>
         </div>
 
@@ -279,7 +279,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             {totalKgsSold.toLocaleString()} kg
           </h2>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Facturado: <strong style={{ color: 'white' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
+            Facturado: <strong style={{ color: 'var(--text-primary)' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
           </p>
         </div>
 
@@ -307,7 +307,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Total Gastos Operativos
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(225, 29, 72, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--color-strawberry)' }}>
               <Wallet size={20} />
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
         </div>
 
         {/* KPI 5: Utilidad Neta */}
-        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(16, 185, 129, 0.08)' : '0 8px 30px rgba(225, 29, 72, 0.08)' }}>
+        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(16, 185, 129, 0.08)' : '0 8px 30px rgba(5, 150, 105, 0.08)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Utilidad Neta Ajustada
@@ -328,7 +328,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <div style={{
               padding: '8px',
               borderRadius: '8px',
-              background: netProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(225, 29, 72, 0.15)',
+              background: netProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(5, 150, 105, 0.15)',
               color: netProfit >= 0 ? 'var(--color-success)' : 'var(--color-strawberry)'
             }}>
               <ArrowUpRight size={20} />
@@ -415,7 +415,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
                 stroke={berryColors['Fresa']}
                 strokeWidth="3.5"
                 strokeLinecap="round"
-                style={{ filter: 'drop-shadow(0px 4px 8px rgba(225,29,72,0.3))' }}
+                style={{ filter: 'drop-shadow(0px 4px 8px rgba(5, 150, 105,0.3))' }}
               />
               {/* Arándano */}
               <path
@@ -592,7 +592,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
                 justifyContent: 'center'
               }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.05em' }}>GASTOS</span>
-                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'white', marginTop: '2px', fontFamily: 'var(--mono)' }}>
+                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px', fontFamily: 'var(--mono)' }}>
                   ${grandTotalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </span>
               </div>

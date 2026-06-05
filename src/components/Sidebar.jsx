@@ -75,7 +75,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
                 gap: '12px',
                 width: '100%',
                 padding: '12px 16px',
-                background: isActive ? 'rgba(225, 29, 72, 0.08)' : 'transparent',
+                background: isActive ? 'rgba(5, 150, 105, 0.08)' : 'transparent',
                 color: isActive ? 'var(--color-strawberry-hover)' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '12px',
@@ -100,7 +100,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
       <div style={{
         marginTop: 'auto',
         padding: '16px 8px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.05)',
+        borderTop: '1px solid var(--panel-border)',
         display: 'flex',
         flexDirection: 'column',
         gap: '12px'

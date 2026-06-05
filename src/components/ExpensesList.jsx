@@ -194,7 +194,7 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(225, 29, 72, 0.1)',
+            background: 'rgba(5, 150, 105, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -203,7 +203,7 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
             <Calendar size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', margin: 0, color: 'white' }}>Período de Análisis de Gastos</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>Período de Análisis de Gastos</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
               {filterStart && filterEnd ? `Mostrando gastos del ${filterStart} al ${filterEnd}` : 'Mostrando todos los gastos registrados'}
             </p>
@@ -260,7 +260,7 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(225, 29, 72, 0.1)',
+            background: 'rgba(5, 150, 105, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -292,7 +292,7 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
           </div>
           <div>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500 }}>Categoría Mayor Gastos</span>
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 0 0', color: 'white' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '2px 0 0 0', color: 'var(--text-primary)' }}>
               {topCategory} <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>(${maxAmount.toLocaleString()} MXN)</span>
             </h3>
           </div>

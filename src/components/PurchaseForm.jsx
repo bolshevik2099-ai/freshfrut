@@ -219,7 +219,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
             <Calendar size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', margin: 0, color: 'white' }}>Período de Recepciones</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>Período de Recepciones</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
               {filterStart && filterEnd ? `Mostrando recepciones del ${filterStart} al ${filterEnd}` : 'Mostrando todo el historial de recepciones'}
             </p>

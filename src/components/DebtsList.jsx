@@ -207,7 +207,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(225, 29, 72, 0.1)',
+            background: 'rgba(5, 150, 105, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -216,7 +216,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
             <Calendar size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1rem', margin: 0, color: 'white' }}>Período de Análisis de Deudas</h3>
+            <h3 style={{ fontSize: '1rem', margin: 0, color: 'var(--text-primary)' }}>Período de Análisis de Deudas</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
               {filterStart && filterEnd ? `Mostrando deudas del ${filterStart} al ${filterEnd}` : 'Mostrando todas las deudas registradas'}
             </p>
@@ -295,7 +295,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
             width: '48px',
             height: '48px',
             borderRadius: '12px',
-            background: 'rgba(225, 29, 72, 0.15)',
+            background: 'rgba(5, 150, 105, 0.15)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -317,7 +317,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
             width: '48px',
             height: '48px',
             borderRadius: '12px',
-            background: netBalance >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(225, 29, 72, 0.1)',
+            background: netBalance >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 150, 105, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -514,7 +514,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
                                   ? 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)' 
                                   : 'linear-gradient(135deg, var(--color-strawberry) 0%, var(--color-strawberry-dark) 100%)',
                                 border: 'none',
-                                color: 'white'
+                                color: 'var(--text-primary)'
                               }}
                               title="Liquidar Cuenta"
                             >

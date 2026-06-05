@@ -395,17 +395,17 @@ export default function QualityControl({ purchases, updatePurchaseQcStatus }) {
                   <tbody>
                     <tr>
                       <td style={{ padding: '4px 0' }}>Brix Mínimo:</td>
-                      <strong style={{ color: 'white', float: 'right' }}>
+                      <strong style={{ color: 'var(--text-primary)', float: 'right' }}>
                         {berryType === 'Arándano' ? '11.0°Bx' : berryType === 'Frambuesa' ? '8.5°Bx' : '8.0°Bx'}
                       </strong>
                     </tr>
                     <tr>
                       <td style={{ padding: '4px 0' }}>Hongo/Pudrición:</td>
-                      <strong style={{ color: 'white', float: 'right' }}>0.0% (Tolerancia Cero)</strong>
+                      <strong style={{ color: 'var(--text-primary)', float: 'right' }}>0.0% (Tolerancia Cero)</strong>
                     </tr>
                     <tr>
                       <td style={{ padding: '4px 0' }}>Fruta Blanda Máxima:</td>
-                      <strong style={{ color: 'white', float: 'right' }}>{targetMarket === 'Japón' ? '2.0%' : '5.0%'}</strong>
+                      <strong style={{ color: 'var(--text-primary)', float: 'right' }}>{targetMarket === 'Japón' ? '2.0%' : '5.0%'}</strong>
                     </tr>
                   </tbody>
                 </table>

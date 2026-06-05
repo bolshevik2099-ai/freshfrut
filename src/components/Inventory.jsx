@@ -191,7 +191,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
             <PackageOpen size={20} />
           </div>
           <div>
-            <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'white' }}>Filtro de Cultivo</h3>
+            <h3 style={{ fontSize: '1.05rem', margin: 0, color: 'var(--text-primary)' }}>Filtro de Cultivo</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>
               {selectedFruit === 'ALL' ? 'Mostrando todos los cultivos en inventario' : `Mostrando inventario filtrado por: ${selectedFruit}`}
             </p>
@@ -427,7 +427,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                         <td>{p.producer}</td>
                         <td>{p.berry} ({p.variety})</td>
                         <td>
-                          <span style={{ fontWeight: 700, color: 'white' }}>{p.remainingKg.toLocaleString()} kg</span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{p.remainingKg.toLocaleString()} kg</span>
                           <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>de {p.kg.toLocaleString()} kg</span>
                         </td>
                         <td>
@@ -488,7 +488,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                         <td>{p.producer}</td>
                         <td>{p.berry} ({p.variety})</td>
                         <td>
-                          <span style={{ fontWeight: 700, color: 'white' }}>{p.remainingKg.toLocaleString()} kg</span>
+                          <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{p.remainingKg.toLocaleString()} kg</span>
                           <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)' }}>de {p.kg.toLocaleString()} kg</span>
                         </td>
                         <td>
@@ -599,7 +599,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                                 gap: '4px',
                                 background: 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)',
                                 border: 'none',
-                                color: 'white'
+                                color: 'var(--text-primary)'
                               }}
                               title="Marcar como Entregado"
                             >

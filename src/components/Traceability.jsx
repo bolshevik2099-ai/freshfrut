@@ -101,7 +101,7 @@ export default function Traceability({ purchases, sales }) {
               <span className="badge badge-blue" style={{ marginBottom: '8px' }}>Estatus del Inventario</span>
               <h2 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-title)' }}>{selectedLot.id}</h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                Cultivo: <strong style={{ color: 'white' }}>{selectedLot.berry} ({selectedLot.variety})</strong>
+                Cultivo: <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.berry} ({selectedLot.variety})</strong>
               </p>
             </div>
 
@@ -114,7 +114,7 @@ export default function Traceability({ purchases, sales }) {
 
               <div>
                 <span style={{ color: 'var(--text-secondary)', display: 'block', fontSize: '0.75rem', textTransform: 'uppercase' }}>Kilos Recibidos (Inicial)</span>
-                <span style={{ fontWeight: 600, color: 'white' }}>{selectedLot.kg.toLocaleString()} kg</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{selectedLot.kg.toLocaleString()} kg</span>
               </div>
 
               <div>
@@ -151,11 +151,11 @@ export default function Traceability({ purchases, sales }) {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Kilos Vendidos:</span>
-                      <strong style={{ float: 'right', color: 'white' }}>{totalKgSold.toLocaleString()} kg</strong>
+                      <strong style={{ float: 'right', color: 'var(--text-primary)' }}>{totalKgSold.toLocaleString()} kg</strong>
                     </div>
                     <div>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Venta Acumulada:</span>
-                      <strong style={{ float: 'right', color: 'white' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
+                      <strong style={{ float: 'right', color: 'var(--text-primary)' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
                     </div>
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '4px', paddingTop: '4px' }}>
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Ganancia:</span>
@@ -214,12 +214,12 @@ export default function Traceability({ purchases, sales }) {
                   <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px', borderRadius: '8px', marginTop: '6px', border: '1px solid var(--panel-border)', fontSize: '0.85rem' }}>
                     {selectedLot.storageLocation === 'PROVEEDOR' ? (
                       <p style={{ color: 'var(--text-secondary)' }}>
-                        Adquirido el <strong style={{ color: 'white' }}>{selectedLot.date}</strong>. Cantidad inicial: <strong style={{ color: 'white' }}>{selectedLot.kg.toLocaleString()} kg</strong>. 
-                        Alojado temporalmente en las bodegas del productor <strong style={{ color: 'white' }}>{selectedLot.producer}</strong> (Fruta de nuestra propiedad).
+                        Adquirido el <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.date}</strong>. Cantidad inicial: <strong style={{ color: 'white' }}>{selectedLot.kg.toLocaleString()} kg</strong>. 
+                        Alojado temporalmente en las bodegas del productor <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.producer}</strong> (Fruta de nuestra propiedad).
                       </p>
                     ) : (
                       <p style={{ color: 'var(--text-secondary)' }}>
-                        Ingresado y pesado físicamente el <strong style={{ color: 'white' }}>{selectedLot.date}</strong>. Cantidad recibida en planta: <strong style={{ color: 'white' }}>{selectedLot.kg.toLocaleString()} kg</strong> de la huerta de <strong>{selectedLot.producer}</strong>.
+                        Ingresado y pesado físicamente el <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.date}</strong>. Cantidad recibida en planta: <strong style={{ color: 'white' }}>{selectedLot.kg.toLocaleString()} kg</strong> de la huerta de <strong>{selectedLot.producer}</strong>.
                       </p>
                     )}
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.75rem', marginTop: '4px' }}>
@@ -261,10 +261,10 @@ export default function Traceability({ purchases, sales }) {
                           {selectedLot.qcStatus === 'REJECTED' && <span className="badge badge-danger">Rechazado</span>}
                         </p>
                         <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-                          <span>Brix: <strong style={{ color: 'white' }}>{selectedLot.qcData?.brix}°Bx</strong></span>
-                          <span>Firmeza: <strong style={{ color: 'white' }}>{selectedLot.qcData?.firmness} g/mm</strong></span>
-                          <span>Hongo: <strong style={{ color: 'white' }}>{selectedLot.qcData?.mold}%</strong></span>
-                          <span>Blanda: <strong style={{ color: 'white' }}>{selectedLot.qcData?.softFruit}%</strong></span>
+                          <span>Brix: <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.qcData?.brix}°Bx</strong></span>
+                          <span>Firmeza: <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.qcData?.firmness} g/mm</strong></span>
+                          <span>Hongo: <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.qcData?.mold}%</strong></span>
+                          <span>Blanda: <strong style={{ color: 'var(--text-primary)' }}>{selectedLot.qcData?.softFruit}%</strong></span>
                         </div>
                         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '6px' }}>
                           Mercado: {selectedLot.qcData?.targetMarket} | Inspector: {selectedLot.qcData?.inspector}
@@ -341,7 +341,7 @@ export default function Traceability({ purchases, sales }) {
                               }}
                             >
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <strong style={{ color: 'white' }}>{sale.client}</strong>
+                                <strong style={{ color: 'var(--text-primary)' }}>{sale.client}</strong>
                                 <span style={{ fontSize: '0.75rem', fontFamily: 'var(--mono)', color: 'var(--text-secondary)' }}>{sale.id}</span>
                               </div>
                               <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>

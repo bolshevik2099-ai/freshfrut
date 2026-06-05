@@ -33,7 +33,7 @@ export default function LoginPage({ onLogin, onBack }) {
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <div style={logoWrapperStyle}>
-            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'white', letterSpacing: '-0.02em' }}>
+            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
               Fresh<span style={{ color: 'var(--color-strawberry)' }}>Frut</span>
             </span>
           </div>
@@ -102,7 +102,7 @@ export default function LoginPage({ onLogin, onBack }) {
 
         {/* Demo Credentials Box */}
         <div style={demoBoxStyle}>
-          <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'white', marginBottom: '6px' }}>
+          <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
             Acceso Demostrativo:
           </h4>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -144,7 +144,7 @@ const cardStyle = {
   maxWidth: '400px',
   padding: '36px',
   boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
-  border: '1px solid rgba(255, 255, 255, 0.08)'
+  border: '1px solid var(--panel-border)'
 };
 
 const logoWrapperStyle = {
@@ -199,7 +199,7 @@ const errorContainerStyle = {
 const demoBoxStyle = {
   marginTop: '24px',
   background: 'rgba(255, 255, 255, 0.03)',
-  border: '1px dashed rgba(255, 255, 255, 0.1)',
+  border: '1px dashed var(--panel-border)',
   borderRadius: '8px',
   padding: '12px 14px'
 };

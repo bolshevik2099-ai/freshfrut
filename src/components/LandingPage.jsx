@@ -218,7 +218,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
       <section id="calidad" style={sectionStyle}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <span style={{ color: 'var(--color-strawberry)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>FILOSOFÍA DE CALIDAD</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'white', marginTop: '6px' }}>Parámetros Críticos QC</h2>
+          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '6px' }}>Parámetros Críticos QC</h2>
           <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '8px auto 0 auto' }}>
             Nuestra fruta es clasificada e inspeccionada en base a estándares estrictos antes de asignarse a pedidos de exportación.
           </p>
@@ -226,22 +226,22 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
         <div style={qcSpecsGridStyle}>
           <div style={qcSpecCardStyle} className="glass-panel">
             <h4 style={{ color: 'var(--color-strawberry)', fontWeight: 600 }}>Fresa (Strawberry)</h4>
-            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
+            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
             <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>350 g/mm</strong></div>
           </div>
           <div style={qcSpecCardStyle} className="glass-panel">
             <h4 style={{ color: 'var(--color-blueberry)', fontWeight: 600 }}>Arándano (Blueberry)</h4>
-            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '8px 0' }}>Brix Mínimo: <strong>11.0°Bx</strong></div>
+            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>11.0°Bx</strong></div>
             <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>140 g/mm</strong></div>
           </div>
           <div style={qcSpecCardStyle} className="glass-panel">
             <h4 style={{ color: 'var(--color-raspberry)', fontWeight: 600 }}>Frambuesa (Raspberry)</h4>
-            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '8px 0' }}>Brix Mínimo: <strong>8.5°Bx</strong></div>
+            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.5°Bx</strong></div>
             <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>120 g/mm</strong></div>
           </div>
           <div style={qcSpecCardStyle} className="glass-panel">
             <h4 style={{ color: 'var(--color-blackberry)', fontWeight: 600 }}>Mora (Blackberry)</h4>
-            <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
+            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
             <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>130 g/mm</strong></div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
       <section id="contacto" style={contactSectionStyle} className="glass-panel">
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', width: '100%' }}>
           <div>
-            <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'white', marginBottom: '16px' }}>Contáctanos</h2>
+            <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Contáctanos</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6' }}>
               ¿Tienes dudas sobre los procesos de entrega, precios o contratos de importación? Envíanos un mensaje y un ejecutivo especializado te asistirá.
             </p>
@@ -569,7 +569,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
         <div className="modal-overlay" style={modalOverlayStyle}>
           <div className="glass-panel modal-content" style={{ ...modalContentStyle, textAlign: 'center', padding: '36px 24px' }}>
             <CheckCircle2 size={48} color="var(--color-success)" style={{ display: 'inline-block', marginBottom: '16px' }} />
-            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'white', marginBottom: '12px' }}>¡Operación Completada!</h3>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>¡Operación Completada!</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '20px' }}>
               {successMessage}
             </p>
@@ -620,7 +620,7 @@ const headerStyle = {
 const logoStyle = {
   fontSize: '1.5rem',
   fontWeight: 800,
-  color: 'white',
+  color: 'var(--text-primary)',
   letterSpacing: '-0.02em',
   cursor: 'default'
 };
@@ -645,7 +645,7 @@ const adminButtonStyle = {
   fontWeight: 600,
   background: 'linear-gradient(135deg, var(--color-strawberry) 0%, #be123c 100%)',
   border: 'none',
-  color: 'white'
+  color: 'var(--text-primary)'
 };
 
 const heroSectionStyle = {
@@ -668,7 +668,7 @@ const pillLabelStyle = {
   alignItems: 'center',
   gap: '6px',
   background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  border: '1px solid var(--panel-border)',
   borderRadius: '20px',
   padding: '4px 12px',
   fontSize: '0.75rem',
@@ -681,7 +681,7 @@ const heroHeadlineStyle = {
   fontSize: '3.25rem',
   fontWeight: 800,
   lineHeight: '1.15',
-  color: 'white',
+  color: 'var(--text-primary)',
   letterSpacing: '-0.03em'
 };
 
@@ -709,7 +709,7 @@ const heroCtaPrimaryStyle = {
   fontSize: '0.95rem',
   textDecoration: 'none',
   background: 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)',
-  color: 'white',
+  color: 'var(--text-primary)',
   border: 'none'
 };
 
@@ -723,7 +723,7 @@ const heroCtaSecondaryStyle = {
   fontSize: '0.95rem',
   textDecoration: 'none',
   border: '1px solid var(--panel-border)',
-  color: 'white'
+  color: 'var(--text-primary)'
 };
 
 const heroImageWrapperStyle = {
@@ -738,8 +738,7 @@ const heroImageStyle = {
   maxWidth: '480px',
   height: 'auto',
   borderRadius: '24px',
-  boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
-  border: '1px solid rgba(255, 255, 255, 0.1)',
+  boxShadow: '0 20px 40px rgba(0,0,0,0.15)', border: '1px solid var(--panel-border)',
   zIndex: 2
 };
 
@@ -750,7 +749,7 @@ const imageOverlayGlow = {
   transform: 'translate(-50%, -50%)',
   width: '80%',
   height: '80%',
-  background: 'radial-gradient(circle, rgba(225, 29, 72, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
+  background: 'radial-gradient(circle, rgba(5, 150, 105, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
   zIndex: 1,
   pointerEvents: 'none'
 };
@@ -782,7 +781,7 @@ const sectionStyle = {
 
 const buyersSectionBgStyle = {
   width: '100%',
-  background: 'rgba(255, 255, 255, 0.01)',
+  background: 'rgba(0, 0, 0, 0.01)',
   borderTop: '1px solid rgba(255, 255, 255, 0.02)',
   borderBottom: '1px solid rgba(255, 255, 255, 0.02)',
   padding: '80px 20px'
@@ -800,7 +799,7 @@ const sectionTitleStyle = {
   fontFamily: 'var(--font-title)',
   fontSize: '2.25rem',
   fontWeight: 800,
-  color: 'white',
+  color: 'var(--text-primary)',
   lineHeight: '1.2'
 };
 
@@ -820,7 +819,7 @@ const sectionBtnStyle = {
   fontSize: '0.9rem',
   background: 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)',
   border: 'none',
-  color: 'white',
+  color: 'var(--text-primary)',
   cursor: 'pointer'
 };
 
@@ -835,7 +834,7 @@ const imagePlaceholderStyle = {
   maxWidth: '450px',
   padding: '40px',
   borderRadius: '20px',
-  background: 'rgba(255, 255, 255, 0.01)',
+  background: 'rgba(0, 0, 0, 0.01)',
   border: '1px solid rgba(16, 185, 129, 0.2)',
   display: 'flex',
   flexDirection: 'column',
@@ -899,7 +898,7 @@ const modalOverlayStyle = {
   left: 0,
   right: 0,
   bottom: 0,
-  background: 'rgba(3, 3, 10, 0.8)',
+  background: 'rgba(15, 23, 42, 0.5)',
   backdropFilter: 'blur(8px)',
   display: 'flex',
   alignItems: 'center',
@@ -913,7 +912,7 @@ const modalContentStyle = {
   maxWidth: '520px',
   padding: '28px',
   boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-  border: '1px solid rgba(255,255,255,0.1)'
+  border: '1px solid var(--panel-border)'
 };
 
 const modalHeaderStyle = {
@@ -928,6 +927,6 @@ const modalHeaderStyle = {
 const detailRowStyle = {
   display: 'flex',
   justifyContent: 'space-between',
-  borderBottom: '1px solid rgba(255,255,255,0.03)',
+  borderBottom: '1px solid var(--panel-border)',
   paddingBottom: '4px'
 };
