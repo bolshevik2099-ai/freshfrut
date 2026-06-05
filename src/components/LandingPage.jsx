@@ -749,7 +749,7 @@ const imageOverlayGlow = {
   transform: 'translate(-50%, -50%)',
   width: '80%',
   height: '80%',
-  background: 'radial-gradient(circle, rgba(5, 150, 105, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
+  background: 'radial-gradient(circle, rgba(27, 67, 50, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
   zIndex: 1,
   pointerEvents: 'none'
 };

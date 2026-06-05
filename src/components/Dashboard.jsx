@@ -187,7 +187,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(5, 150, 105, 0.1)',
+            background: 'rgba(27, 67, 50, 0.1)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -253,7 +253,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Fruta Ingresada (Compras)
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(27, 67, 50, 0.1)', color: 'var(--color-strawberry)' }}>
               <ShoppingCart size={20} />
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Total Gastos Operativos
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(5, 150, 105, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(27, 67, 50, 0.1)', color: 'var(--color-strawberry)' }}>
               <Wallet size={20} />
             </div>
           </div>
@@ -320,7 +320,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
         </div>
 
         {/* KPI 5: Utilidad Neta */}
-        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(16, 185, 129, 0.08)' : '0 8px 30px rgba(5, 150, 105, 0.08)' }}>
+        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(16, 185, 129, 0.08)' : '0 8px 30px rgba(27, 67, 50, 0.08)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Utilidad Neta Ajustada
@@ -328,7 +328,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
             <div style={{
               padding: '8px',
               borderRadius: '8px',
-              background: netProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(5, 150, 105, 0.15)',
+              background: netProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(27, 67, 50, 0.15)',
               color: netProfit >= 0 ? 'var(--color-success)' : 'var(--color-strawberry)'
             }}>
               <ArrowUpRight size={20} />
@@ -415,7 +415,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
                 stroke={berryColors['Fresa']}
                 strokeWidth="3.5"
                 strokeLinecap="round"
-                style={{ filter: 'drop-shadow(0px 4px 8px rgba(5, 150, 105,0.3))' }}
+                style={{ filter: 'drop-shadow(0px 4px 8px rgba(27, 67, 50,0.3))' }}
               />
               {/* Arándano */}
               <path
