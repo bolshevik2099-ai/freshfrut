@@ -62,23 +62,21 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       {/* Brand Header */}
       <div style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         gap: '12px',
         marginBottom: '30px',
-        padding: '0 8px',
-        textAlign: 'center'
+        padding: '0 8px'
       }}>
         <img 
           src="/tamfresh_logo.png" 
           alt="Tamfresh Logo" 
-          style={{ width: '195px', height: '195px', objectFit: 'contain' }}
+          style={{ width: '115px', height: '115px', objectFit: 'contain' }}
         />
         <div>
-          <h2 style={{ fontSize: '2.0rem', margin: 0, fontWeight: 800, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.6rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
             Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '4px' }}>SISTEMA DE GESTIÓN</p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>SISTEMA DE GESTIÓN</p>
         </div>
       </div>
 
