@@ -26,7 +26,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
 
   // Helper to determine start and end date of the selected preset based on "today" = 2026-06-03
   const getFilterRange = () => {
-    const today = new Date('2026-06-03'); // Anchor today's date to system time for simulation
+    const today = new Date(); // Synchronized with browser's local timezone
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -621,7 +621,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Monto Total (MXN)</label>
                   <input
@@ -647,7 +647,7 @@ export default function DebtsList({ debts, registerDebtPayment, editDebt, delete
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Estatus de Cuenta</label>
                   <select

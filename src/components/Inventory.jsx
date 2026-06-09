@@ -141,10 +141,18 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
   const handleSaleEditSubmit = (e) => {
     e.preventDefault();
     if (!selectedItem) return;
+
+    const finalKg = parseInt(editSaleKg) || 0;
+    const finalPrice = parseFloat(editPriceSoldPerKg) || 0;
+    if (finalKg <= 0 || finalPrice <= 0) {
+      alert("Por favor ingrese una cantidad y precio de venta válidos mayores a 0.");
+      return;
+    }
+
     editSale(selectedItem.id, {
       client: editClient,
-      kg: editSaleKg,
-      priceSoldPerKg: editPriceSoldPerKg,
+      kg: finalKg,
+      priceSoldPerKg: finalPrice,
       status: editStatus,
       containerId: editContainerId,
       shippingLine: editShippingLine
@@ -762,7 +770,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Productor / Huerto</label>
                   <input type="text" value={editProducer} onChange={(e) => setEditProducer(e.target.value)} className="form-input" required />
@@ -773,7 +781,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Cultivo</label>
                   <select value={editBerry} onChange={(e) => setEditBerry(e.target.value)} className="form-select" required>
@@ -790,13 +798,13 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Cantidad Inicial (Kg)</label>
                   <input 
                     type="number" 
                     value={editKg} 
-                    onChange={(e) => setEditKg(parseInt(e.target.value) || 0)} 
+                    onChange={(e) => setEditKg(e.target.value)} 
                     className="form-input" 
                     required 
                     min={selectedItem.kg - selectedItem.remainingKg} 
@@ -806,11 +814,11 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
 
                 <div className="form-group">
                   <label className="form-label">Precio por Kg (MXN)</label>
-                  <input type="number" step="0.01" value={editPricePerKg} onChange={(e) => setEditPricePerKg(parseFloat(e.target.value) || 0)} className="form-input" required />
+                  <input type="number" step="0.01" value={editPricePerKg} onChange={(e) => setEditPricePerKg(e.target.value)} className="form-input" required />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Ubicación Física</label>
                   <select value={editStorageLocation} onChange={(e) => setEditStorageLocation(e.target.value)} className="form-select">
@@ -841,7 +849,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                 }}>
                   <h4 style={{ fontSize: '0.9rem', color: 'var(--color-strawberry-hover)', margin: 0, fontWeight: 600 }}>Parámetros de Reporte QC</h4>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">Inspector</label>
                       <input type="text" value={editInspector} onChange={(e) => setEditInspector(e.target.value)} className="form-input" placeholder="Nombre del inspector" />
@@ -852,25 +860,25 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">Grados Brix</label>
-                      <input type="number" step="0.1" value={editBrix} onChange={(e) => setEditBrix(parseFloat(e.target.value) || 0)} className="form-input" />
+                      <input type="number" step="0.1" value={editBrix} onChange={(e) => setEditBrix(e.target.value)} className="form-input" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">Firmeza (g/mm)</label>
-                      <input type="number" step="1" value={editFirmness} onChange={(e) => setEditFirmness(parseFloat(e.target.value) || 0)} className="form-input" />
+                      <input type="number" step="1" value={editFirmness} onChange={(e) => setEditFirmness(e.target.value)} className="form-input" />
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">% Fruta Blanda</label>
-                      <input type="number" step="0.1" value={editSoftFruit} onChange={(e) => setEditSoftFruit(parseFloat(e.target.value) || 0)} className="form-input" />
+                      <input type="number" step="0.1" value={editSoftFruit} onChange={(e) => setEditSoftFruit(e.target.value)} className="form-input" />
                     </div>
                     <div className="form-group">
                       <label className="form-label">% Moho</label>
-                      <input type="number" step="0.1" value={editMold} onChange={(e) => setEditMold(parseFloat(e.target.value) || 0)} className="form-input" />
+                      <input type="number" step="0.1" value={editMold} onChange={(e) => setEditMold(e.target.value)} className="form-input" />
                     </div>
                   </div>
                 </div>
@@ -905,7 +913,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                 <input 
                   type="number" 
                   value={editSaleKg} 
-                  onChange={(e) => setEditSaleKg(parseInt(e.target.value) || 0)} 
+                  onChange={(e) => setEditSaleKg(e.target.value)} 
                   className="form-input" 
                   required 
                   max={selectedItem.kg + (getSourceLot(selectedItem.purchaseId).remainingKg || 0)}
@@ -918,7 +926,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
 
               <div className="form-group">
                 <label className="form-label">Precio Venta por Kg (MXN)</label>
-                <input type="number" step="0.01" value={editPriceSoldPerKg} onChange={(e) => setEditPriceSoldPerKg(parseFloat(e.target.value) || 0)} className="form-input" required />
+                <input type="number" step="0.01" value={editPriceSoldPerKg} onChange={(e) => setEditPriceSoldPerKg(e.target.value)} className="form-input" required />
               </div>
 
               <div className="form-group">
@@ -933,7 +941,7 @@ export default function Inventory({ purchases, sales, deletePurchase, editPurcha
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Contenedor</label>
                   <input type="text" value={editContainerId} onChange={(e) => setEditContainerId(e.target.value)} className="form-input" />

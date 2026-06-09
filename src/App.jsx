@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './supabaseClient';
+import { Menu } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import Inventory from './components/Inventory';
@@ -13,6 +14,8 @@ import DebtsList from './components/DebtsList';
 import ExpensesList from './components/ExpensesList';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
+import AIChat from './components/AIChat';
+import ChatConfig from './components/ChatConfig';
 
 
 
@@ -23,20 +26,62 @@ function App() {
     return localStorage.getItem('freshfrut_session') === 'active' ? 'admin' : 'landing';
   });
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [userRole, setUserRole] = useState(() => {
+    return localStorage.getItem('freshfrut_user_role') || 'admin';
+  });
+  const [userEmail, setUserEmail] = useState(() => {
+    return localStorage.getItem('freshfrut_user_email') || 'admin@tamfresh.com';
+  });
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [purchases, setPurchases] = useState([]);
   const [sales, setSales] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [clients, setClients] = useState([]);
   const [debts, setDebts] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [lastOperatorActivity, setLastOperatorActivity] = useState(null);
 
-  const handleLogin = (email, password) => {
+  const fetchLastOperatorActivity = async () => {
+    try {
+      const { data } = await supabase
+        .from('user_activity_logs')
+        .select('created_at')
+        .eq('user_email', 'operador@tamfresh.com')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        const date = new Date(data[0].created_at);
+        const formatted = date.toLocaleString('es-MX', { timeZone: 'America/Mexico_City' });
+        setLastOperatorActivity(formatted);
+      }
+    } catch (err) {
+      console.error("Error fetching operator activity:", err);
+    }
+  };
+
+  const handleLogin = (email, role) => {
     localStorage.setItem('freshfrut_session', 'active');
+    localStorage.setItem('freshfrut_user_email', email);
+    localStorage.setItem('freshfrut_user_role', role);
+    setUserEmail(email);
+    setUserRole(role);
     setCurrentView('admin');
+    setActiveTab('dashboard');
+
+    if (email === 'operador@tamfresh.com') {
+      supabase.from('user_activity_logs').insert([{ user_email: 'operador@tamfresh.com', activity_type: 'LOGIN' }]).then(() => {});
+    } else if (email === 'admin@tamfresh.com') {
+      fetchLastOperatorActivity();
+    }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('freshfrut_session');
+    localStorage.removeItem('freshfrut_user_email');
+    localStorage.removeItem('freshfrut_user_role');
+    setUserEmail('admin@tamfresh.com');
+    setUserRole('admin');
+    setLastOperatorActivity(null);
     setCurrentView('landing');
   };
 
@@ -61,6 +106,17 @@ function App() {
 
         const { data: exps } = await supabase.from('expenses').select('*');
         if (exps) setExpenses(exps);
+
+        // Track user activity and fetch operator activity for admin
+        const sessionActive = localStorage.getItem('freshfrut_session') === 'active';
+        const emailStored = localStorage.getItem('freshfrut_user_email');
+        if (sessionActive) {
+          if (emailStored === 'operador@tamfresh.com') {
+            await supabase.from('user_activity_logs').insert([{ user_email: 'operador@tamfresh.com', activity_type: 'REFRESH' }]);
+          } else if (emailStored === 'admin@tamfresh.com') {
+            await fetchLastOperatorActivity();
+          }
+        }
       } catch (err) {
         console.error("Error loading data from Supabase:", err);
       }
@@ -111,80 +167,75 @@ function App() {
   };
 
   const editPurchase = async (id, updatedLot) => {
-    let finalLot;
-    setPurchases(prev => prev.map(p => {
-      if (p.id === id) {
-        const lotSales = sales.filter(s => s.purchaseId === id);
-        const totalSold = lotSales.reduce((sum, s) => sum + s.kg, 0);
-        const remaining = Math.max(0, updatedLot.kg - totalSold);
-        const saleStatus = remaining === 0 ? 'SOLD' : remaining < updatedLot.kg ? 'PARTIALLY_SOLD' : 'UNSOLD';
-        
-        finalLot = {
-          ...p,
-          ...updatedLot,
-          remainingKg: remaining,
-          saleStatus,
-          totalCost: updatedLot.kg * updatedLot.pricePerKg
-        };
-        return finalLot;
-      }
-      return p;
-    }));
+    const lot = purchases.find(p => p.id === id);
+    if (!lot) return;
 
-    if (finalLot) {
-      const { error } = await supabase
-        .from('purchases')
-        .update({
-          producer: finalLot.producer,
-          kg: finalLot.kg,
-          remainingKg: finalLot.remainingKg,
-          pricePerKg: finalLot.pricePerKg,
-          totalCost: finalLot.totalCost,
-          storageLocation: finalLot.storageLocation,
-          berry: finalLot.berry,
-          variety: finalLot.variety,
-          date: finalLot.date,
-          qcStatus: finalLot.qcStatus,
-          saleStatus: finalLot.saleStatus,
-          qcData: finalLot.qcData
-        })
-        .eq('id', id);
-      if (error) console.error("Error updating purchase:", error);
-    }
+    const lotSales = sales.filter(s => s.purchaseId === id);
+    const totalSold = lotSales.reduce((sum, s) => sum + s.kg, 0);
+    const remaining = Math.max(0, updatedLot.kg - totalSold);
+    const saleStatus = remaining === 0 ? 'SOLD' : remaining < updatedLot.kg ? 'PARTIALLY_SOLD' : 'UNSOLD';
+    
+    const finalLot = {
+      ...lot,
+      ...updatedLot,
+      remainingKg: remaining,
+      saleStatus,
+      totalCost: updatedLot.kg * updatedLot.pricePerKg
+    };
+
+    setPurchases(prev => prev.map(p => p.id === id ? finalLot : p));
+
+    const { error } = await supabase
+      .from('purchases')
+      .update({
+        producer: finalLot.producer,
+        kg: finalLot.kg,
+        remainingKg: finalLot.remainingKg,
+        pricePerKg: finalLot.pricePerKg,
+        totalCost: finalLot.totalCost,
+        storageLocation: finalLot.storageLocation,
+        berry: finalLot.berry,
+        variety: finalLot.variety,
+        date: finalLot.date,
+        qcStatus: finalLot.qcStatus,
+        saleStatus: finalLot.saleStatus,
+        qcData: finalLot.qcData
+      })
+      .eq('id', id);
+    if (error) console.error("Error updating purchase:", error);
 
     // Also update any linked debt amount if it exists
-    setDebts(prev => prev.map(d => {
-      if (d.sourceId === id) {
-        const newAmount = updatedLot.kg * updatedLot.pricePerKg;
-        const amountDiff = newAmount - d.amount;
-        const newRemaining = Math.max(0, d.remainingAmount + amountDiff);
-        const status = newRemaining === 0 ? 'PAID' : newRemaining < newAmount ? 'PARTIAL' : 'PENDING';
-        
-        const finalDebt = {
-          ...d,
+    const d = debts.find(debt => debt.sourceId === id);
+    if (d) {
+      const newAmount = updatedLot.kg * updatedLot.pricePerKg;
+      const amountDiff = newAmount - d.amount;
+      const newRemaining = Math.max(0, d.remainingAmount + amountDiff);
+      const status = newRemaining === 0 ? 'PAID' : newRemaining < newAmount ? 'PARTIAL' : 'PENDING';
+
+      setDebts(prev => prev.map(debt => {
+        if (debt.sourceId === id) {
+          return {
+            ...debt,
+            entityName: updatedLot.producer,
+            amount: newAmount,
+            remainingAmount: newRemaining,
+            status
+          };
+        }
+        return debt;
+      }));
+
+      const { error: debtErr } = await supabase
+        .from('debts')
+        .update({
           entityName: updatedLot.producer,
           amount: newAmount,
           remainingAmount: newRemaining,
           status
-        };
-
-        supabase
-          .from('debts')
-          .update({
-            entityName: finalDebt.entityName,
-            amount: finalDebt.amount,
-            remainingAmount: finalDebt.remainingAmount,
-            status: finalDebt.status
-          })
-          .eq('id', d.id)
-          .then(({ error: debtErr }) => {
-            if (debtErr) console.error("Error updating debt:", debtErr);
-          });
-
-        return finalDebt;
-      }
-      return d;
-    }));
+        })
+        .eq('id', d.id);
+      if (debtErr) console.error("Error updating debt:", debtErr);
+    }
   };
 
   const deletePurchase = async (id) => {
@@ -228,28 +279,21 @@ function App() {
   };
 
   const updatePurchaseSaleStatus = async (lotId, kgSold) => {
-    let finalLot;
-    setPurchases(prev => prev.map(p => {
-      if (p.id === lotId) {
-        const remaining = Math.max(0, p.remainingKg - kgSold);
-        const saleStatus = remaining === 0 ? 'SOLD' : 'PARTIALLY_SOLD';
-        finalLot = { 
-          ...p, 
-          remainingKg: remaining, 
-          saleStatus 
-        };
-        return finalLot;
-      }
-      return p;
-    }));
+    const lot = purchases.find(p => p.id === lotId);
+    if (!lot) return;
 
-    if (finalLot) {
-      const { error } = await supabase
-        .from('purchases')
-        .update({ remainingKg: finalLot.remainingKg, saleStatus: finalLot.saleStatus })
-        .eq('id', lotId);
-      if (error) console.error("Error updating purchase remaining kg:", error);
-    }
+    const remaining = Math.max(0, lot.remainingKg - kgSold);
+    const saleStatus = remaining === 0 ? 'SOLD' : 'PARTIALLY_SOLD';
+
+    setPurchases(prev => prev.map(p => 
+      p.id === lotId ? { ...p, remainingKg: remaining, saleStatus } : p
+    ));
+
+    const { error } = await supabase
+      .from('purchases')
+      .update({ remainingKg: remaining, saleStatus })
+      .eq('id', lotId);
+    if (error) console.error("Error updating purchase remaining kg:", error);
   };
 
   const deleteSale = async (saleId) => {
@@ -257,26 +301,25 @@ function App() {
     if (!saleToDelete) return;
 
     if (confirm(`¿Estás seguro de eliminar la Venta ${saleId}? Los kilos vendidos se devolverán al inventario y se cancelará su deuda asociada.`)) {
-      let finalLot;
-      setPurchases(prev => prev.map(p => {
-        if (p.id === saleToDelete.purchaseId) {
-          const remaining = p.remainingKg + saleToDelete.kg;
-          const saleStatus = remaining === p.kg ? 'UNSOLD' : 'PARTIALLY_SOLD';
-          finalLot = { ...p, remainingKg: remaining, saleStatus };
-          return finalLot;
-        }
-        return p;
-      }));
-      setSales(prev => prev.filter(s => s.id !== saleId));
-      setDebts(prev => prev.filter(d => d.sourceId !== saleId));
+      const lot = purchases.find(p => p.id === saleToDelete.purchaseId);
+      
+      if (lot) {
+        const remaining = lot.remainingKg + saleToDelete.kg;
+        const saleStatus = remaining === lot.kg ? 'UNSOLD' : 'PARTIALLY_SOLD';
 
-      if (finalLot) {
+        setPurchases(prev => prev.map(p => 
+          p.id === saleToDelete.purchaseId ? { ...p, remainingKg: remaining, saleStatus } : p
+        ));
+
         const { error: pErr } = await supabase
           .from('purchases')
-          .update({ remainingKg: finalLot.remainingKg, saleStatus: finalLot.saleStatus })
-          .eq('id', finalLot.id);
+          .update({ remainingKg: remaining, saleStatus })
+          .eq('id', lot.id);
         if (pErr) console.error("Error updating purchase remaining kg after sale deletion:", pErr);
       }
+
+      setSales(prev => prev.filter(s => s.id !== saleId));
+      setDebts(prev => prev.filter(d => d.sourceId !== saleId));
 
       const { error: sErr } = await supabase.from('sales').delete().eq('id', saleId);
       if (sErr) console.error("Error deleting sale:", sErr);
@@ -299,59 +342,43 @@ function App() {
       return;
     }
 
-    // Deduct diff from lot
-    let finalLot;
-    setPurchases(prev => prev.map(p => {
-      if (p.id === oldSale.purchaseId) {
-        const remaining = Math.max(0, p.remainingKg - kgDiff);
-        const saleStatus = remaining === 0 ? 'SOLD' : remaining === p.kg ? 'UNSOLD' : 'PARTIALLY_SOLD';
-        finalLot = { ...p, remainingKg: remaining, saleStatus };
-        return finalLot;
-      }
-      return p;
-    }));
+    const remaining = Math.max(0, lot.remainingKg - kgDiff);
+    const saleStatus = remaining === 0 ? 'SOLD' : remaining === lot.kg ? 'UNSOLD' : 'PARTIALLY_SOLD';
 
-    if (finalLot) {
-      const { error: pErr } = await supabase
-        .from('purchases')
-        .update({ remainingKg: finalLot.remainingKg, saleStatus: finalLot.saleStatus })
-        .eq('id', finalLot.id);
-      if (pErr) console.error("Error updating purchase remaining kg after sale edit:", pErr);
-    }
+    setPurchases(prev => prev.map(p => 
+      p.id === oldSale.purchaseId ? { ...p, remainingKg: remaining, saleStatus } : p
+    ));
+
+    const { error: pErr } = await supabase
+      .from('purchases')
+      .update({ remainingKg: remaining, saleStatus })
+      .eq('id', lot.id);
+    if (pErr) console.error("Error updating purchase remaining kg after sale edit:", pErr);
 
     // Update sale and associated debt
     const newRevenue = updatedSale.kg * updatedSale.priceSoldPerKg;
-    setDebts(prev => prev.map(d => {
-      if (d.sourceId === saleId) {
-        const revDiff = newRevenue - d.amount;
-        const newRemaining = Math.max(0, d.remainingAmount + revDiff);
-        const status = newRemaining === 0 ? 'PAID' : newRemaining < newRevenue ? 'PARTIAL' : 'PENDING';
-        
-        const finalDebt = {
-          ...d,
+    const d = debts.find(debt => debt.sourceId === saleId);
+    
+    if (d) {
+      const revDiff = newRevenue - d.amount;
+      const newRemaining = Math.max(0, d.remainingAmount + revDiff);
+      const status = newRemaining === 0 ? 'PAID' : newRemaining < newRevenue ? 'PARTIAL' : 'PENDING';
+
+      setDebts(prev => prev.map(debt => 
+        debt.sourceId === saleId ? { ...debt, entityName: updatedSale.client, amount: newRevenue, remainingAmount: newRemaining, status } : debt
+      ));
+
+      const { error: dErr } = await supabase
+        .from('debts')
+        .update({
           entityName: updatedSale.client,
           amount: newRevenue,
           remainingAmount: newRemaining,
           status
-        };
-
-        supabase
-          .from('debts')
-          .update({
-            entityName: finalDebt.entityName,
-            amount: finalDebt.amount,
-            remainingAmount: finalDebt.remainingAmount,
-            status: finalDebt.status
-          })
-          .eq('id', d.id)
-          .then(({ error: dErr }) => {
-            if (dErr) console.error("Error updating debt after sale edit:", dErr);
-          });
-
-        return finalDebt;
-      }
-      return d;
-    }));
+        })
+        .eq('id', d.id);
+      if (dErr) console.error("Error updating debt after sale edit:", dErr);
+    }
 
     setSales(prev => prev.map(s => {
       if (s.id === saleId) {
@@ -430,28 +457,21 @@ function App() {
 
   // --- Debt Payment Handler ---
   const registerDebtPayment = async (debtId, paymentAmount) => {
-    let finalDebt;
-    setDebts(prev => prev.map(d => {
-      if (d.id === debtId) {
-        const remaining = Math.max(0, d.remainingAmount - paymentAmount);
-        const status = remaining === 0 ? 'PAID' : remaining < d.amount ? 'PARTIAL' : 'PENDING';
-        finalDebt = {
-          ...d,
-          remainingAmount: remaining,
-          status
-        };
-        return finalDebt;
-      }
-      return d;
-    }));
+    const debt = debts.find(d => d.id === debtId);
+    if (!debt) return;
 
-    if (finalDebt) {
-      const { error } = await supabase
-        .from('debts')
-        .update({ remainingAmount: finalDebt.remainingAmount, status: finalDebt.status })
-        .eq('id', debtId);
-      if (error) console.error("Error registering debt payment:", error);
-    }
+    const remaining = Math.max(0, debt.remainingAmount - paymentAmount);
+    const status = remaining === 0 ? 'PAID' : remaining < debt.amount ? 'PARTIAL' : 'PENDING';
+
+    setDebts(prev => prev.map(d => 
+      d.id === debtId ? { ...d, remainingAmount: remaining, status } : d
+    ));
+
+    const { error } = await supabase
+      .from('debts')
+      .update({ remainingAmount: remaining, status })
+      .eq('id', debtId);
+    if (error) console.error("Error registering debt payment:", error);
   };
 
   // --- Edit Debt Handler ---
@@ -511,13 +531,85 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Mobile Header Bar */}
+      <header className="mobile-header glass-panel" style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: '60px',
+        zIndex: 1000,
+        display: 'none', // Managed in CSS via media queries
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: '0 16px',
+        borderRadius: 0,
+        borderBottom: '1px solid var(--panel-border)',
+        background: 'rgba(255,255,255,0.7)',
+        backdropFilter: 'blur(20px)'
+      }}>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <Menu size={24} />
+        </button>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-title)' }}>
+          <img src="/tamfresh_logo.png" alt="Tamfresh Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+          Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
+        </span>
+        <div style={{ width: '40px' }}></div> {/* Spacer to center title */}
+      </header>
+
       {/* Sidebar Navigation */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onLogout={handleLogout} 
+        userRole={userRole} 
+        isMobileOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+      />
 
       {/* Main Panel Content */}
       <main className="main-content">
+        {userRole === 'admin' && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'var(--panel-bg)',
+            border: '1px solid var(--panel-border)',
+            boxShadow: '0 4px 15px rgba(30, 58, 138, 0.03)',
+            backdropFilter: 'blur(10px)',
+            fontSize: '0.85rem',
+            color: 'var(--text-primary)',
+            flexWrap: 'wrap',
+            gap: '12px',
+            marginBottom: '8px'
+          }} className="admin-activity-bar">
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span className="pulse-dot" style={{ width: '8px', height: '8px', backgroundColor: lastOperatorActivity ? 'var(--color-success)' : 'var(--color-warning)' }}></span>
+              <strong>Seguimiento de Operador:</strong> {lastOperatorActivity ? `Última actividad el ${lastOperatorActivity}` : 'Sin actividad reciente registrada (operador aún no ha ingresado)'}
+            </span>
+            <span className="badge badge-blue" style={{ padding: '4px 10px', fontSize: '0.7rem', textTransform: 'none', background: 'rgba(30, 58, 138, 0.05)', color: 'var(--color-blueberry)', border: '1px solid rgba(30, 58, 138, 0.15)' }}>
+              Modo Administrador
+            </span>
+          </div>
+        )}
+
         {activeTab === 'dashboard' && (
-          <Dashboard purchases={purchases} sales={sales} expenses={expenses} />
+          <Dashboard purchases={purchases} sales={sales} expenses={expenses} debts={debts} />
         )}
 
         {activeTab === 'inventory' && (
@@ -598,7 +690,21 @@ function App() {
             deleteExpense={deleteExpense} 
           />
         )}
+
+        {activeTab === 'chat_config' && (
+          <ChatConfig />
+        )}
       </main>
+
+      <AIChat 
+        purchases={purchases} 
+        sales={sales} 
+        suppliers={suppliers} 
+        clients={clients} 
+        debts={debts} 
+        expenses={expenses} 
+        userEmail={userEmail}
+      />
     </div>
   );
 }

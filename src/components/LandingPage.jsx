@@ -36,6 +36,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
     clientName: '',
     clientEmail: '',
     targetCountry: '',
+    packagingType: 'Bolsa Retail (300g - 1kg)',
     message: ''
   });
 
@@ -53,7 +54,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
   const handleProducerSubmit = (e) => {
     e.preventDefault();
     setSuccessMessage(
-      `¡Gracias, ${producerForm.name}! Tu solicitud de registro para el envío de ${producerForm.estimatedKg} kg de ${producerForm.berry} en ${producerForm.location} ha sido recibida. Un inspector de Fresh Frut se comunicará contigo en menos de 24 horas para coordinar la inspección en huerto.`
+      `¡Gracias, ${producerForm.name}! Tu solicitud de entrega para procesamiento de ${producerForm.estimatedKg} kg de ${producerForm.berry} frescas en ${producerForm.location} ha sido recibida. Un asesor se comunicará contigo en menos de 24 horas para programar la recepción y control de calidad de fruta fresca en planta.`
     );
     setActiveModal('success');
     setProducerForm({ name: '', phone: '', berry: 'Fresa', variety: '', estimatedKg: '', location: '' });
@@ -62,15 +63,15 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
   const handleQuoteSubmit = (e) => {
     e.preventDefault();
     setSuccessMessage(
-      `¡Solicitud enviada con éxito! Hemos registrado tu interés por el lote ${selectedLot.id} (${selectedLot.berry} - ${selectedLot.remainingKg.toLocaleString()} kg). Enviaremos una cotización formal y los certificados de calidad QC al correo ${quoteForm.clientEmail} de inmediato.`
+      `¡Solicitud enviada con éxito! Hemos registrado tu interés por el lote ${selectedLot.id} (${selectedLot.berry} - ${selectedLot.remainingKg.toLocaleString()} kg) con empaque "${quoteForm.packagingType}". Enviaremos la cotización formal B2B y las fichas técnicas microbiológicas y de calidad del congelado al correo ${quoteForm.clientEmail} de inmediato.`
     );
     setActiveModal('success');
-    setQuoteForm({ clientName: '', clientEmail: '', targetCountry: '', message: '' });
+    setQuoteForm({ clientName: '', clientEmail: '', targetCountry: '', packagingType: 'Bolsa Retail (300g - 1kg)', message: '' });
   };
 
   const handleContactSubmit = (e) => {
     e.preventDefault();
-    alert(`Mensaje enviado con éxito. Gracias por contactar a Fresh Frut, ${contactForm.name}.`);
+    alert(`Mensaje enviado con éxito. Gracias por contactar a Tamfresh, ${contactForm.name}.`);
     setContactForm({ name: '', email: '', message: '' });
   };
 
@@ -80,21 +81,27 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
   };
 
   return (
-    <div style={layoutStyle}>
+    <div style={layoutStyle} className="landing-layout">
       {/* 1. Header & Navigation */}
-      <header style={headerStyle} className="glass-panel">
-        <div style={logoStyle}>
-          Fresh<span style={{ color: 'var(--color-strawberry)' }}>Frut</span>
+      <header style={headerStyle} className="glass-panel landing-header">
+        <div style={{ ...logoStyle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <img 
+            src="/tamfresh_logo.png" 
+            alt="Tamfresh Logo" 
+            style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+          />
+          <span style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
+            Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
+          </span>
         </div>
         <nav style={navStyle}>
           <a href="#inicio" style={navLinkStyle}>Inicio</a>
-          <a href="#productores" style={navLinkStyle}>Productores</a>
-          <a href="#compradores" style={navLinkStyle}>Compradores</a>
-          <a href="#calidad" style={navLinkStyle}>Calidad</a>
+          <a href="#origen" style={navLinkStyle}>Origen y Calidad</a>
+          <a href="#compradores" style={navLinkStyle}>Productos</a>
           <a href="#contacto" style={navLinkStyle}>Contacto</a>
         </nav>
         <button onClick={onNavigateToLogin} style={adminButtonStyle} className="btn-primary">
-          Portal Interno
+          Iniciar Sesión
         </button>
       </header>
 
@@ -105,27 +112,27 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
         <div className="landing-grid animate-fade-in">
           <div style={heroTextStyle} className="animate-slide-up">
             <span style={pillLabelStyle}>
-              <Award size={12} /> Líderes en Exportación de Berries
+              <Award size={12} /> Suministro de Berries Congeladas y Empacadas
             </span>
             <h1 style={heroHeadlineStyle}>
-              Conectamos los mejores huertos con los mercados más exigentes
+              Berries congeladas y empacadas listas para tu marca
             </h1>
             <p style={heroSubheadStyle}>
-              Fresh Frut gestiona la cadena de suministro de fresas, arándanos, frambuesas y moras con tecnología en tiempo real y trazabilidad absoluta desde la cosecha hasta el destino internacional.
+              Suministramos fresas, arándanos, frambuesas y moras congeladas de origen y empacadas a la medida de tu negocio. Soluciones premium y stock constante todo el año para marcas de consumo, cadenas de supermercados y distribuidores.
             </p>
             <div style={heroActionsStyle}>
-              <a href="#productores" style={heroCtaPrimaryStyle} className="btn-primary">
-                Soy Productor <Sprout size={16} />
+              <a href="#compradores" style={heroCtaPrimaryStyle} className="btn-primary">
+                Ver Catálogo <ShoppingCart size={16} />
               </a>
-              <a href="#compradores" style={heroCtaSecondaryStyle} className="btn-secondary">
-                Soy Comprador <ShoppingCart size={16} />
+              <a href="#contacto" style={heroCtaSecondaryStyle} className="btn-secondary">
+                Solicitar Cotización <ArrowRight size={16} />
               </a>
             </div>
           </div>
           <div style={heroImageWrapperStyle} className="animate-float">
             <img 
               src="/fresh_berries_hero.png" 
-              alt="Fresh Berries Fresh Frut" 
+              alt="Berries Congeladas Tamfresh" 
               style={heroImageStyle} 
             />
             <div style={imageOverlayGlow}></div>
@@ -137,45 +144,42 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
       <section style={featuresSectionStyle}>
         <div style={featureCardStyle} className="glass-panel landing-card">
           <ShieldCheck size={32} color="var(--color-success)" />
-          <h3>Estándares Fitosanitarios</h3>
-          <p>Inspección rigurosa de grados Brix, firmeza y descarte de moho en nuestro laboratorio interno.</p>
+          <h3>Congelación y Conservación</h3>
+          <p>Congelamos las berries en su punto óptimo de madurez para preservar su sabor, textura, nutrientes y frescura de forma natural.</p>
         </div>
         <div style={featureCardStyle} className="glass-panel landing-card">
           <TrendingUp size={32} color="var(--color-blueberry)" />
-          <h3>Inteligencia de Mercado</h3>
-          <p>Precios justos y transparentes basados en la cotización internacional y calidad de fruta.</p>
+          <h3>Empaque Retail & B2B</h3>
+          <p>Diferentes formatos de envasado listos para anaquel, private label o empaques bulk de cartón para distribución e industria.</p>
         </div>
         <div style={featureCardStyle} className="glass-panel landing-card">
           <MapPin size={32} color="var(--color-raspberry)" />
-          <h3>Trazabilidad Total</h3>
-          <p>Monitoreo completo del lote: huerto de origen, bodega, pre-enfriado, tránsito y entrega final.</p>
+          <h3>Cadena de Frío Activa</h3>
+          <p>Monitoreo térmico constante en cámaras a -18°C y contenedores refrigerados para conservar la fruta sin pérdidas.</p>
         </div>
       </section>
 
-      {/* 4. Producers Section */}
-      <section id="productores" style={sectionStyle}>
+      {/* 4. Process Section */}
+      <section id="origen" style={sectionStyle}>
         <div className="landing-grid">
           <div style={sectionImageContainerStyle}>
             <div style={imagePlaceholderStyle} className="glass-panel">
               <Sprout size={48} color="var(--color-success)" style={{ marginBottom: '16px' }} />
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Logística del Productor</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Nuestro Proceso</h2>
               <ul style={listStyle}>
-                <li>✓ Pesaje certificado en planta de acopio.</li>
-                <li>✓ Resultados QC emitidos en menos de 2 horas.</li>
-                <li>✓ Liquidación directa y transparente.</li>
-                <li>✓ Financiamiento de cajas y asesoría de campo.</li>
+                <li>✓ Alianza directa con agricultores locales.</li>
+                <li>✓ Recepción diaria de fruta fresca seleccionada.</li>
+                <li>✓ Riguroso proceso de lavado y selección óptica.</li>
+                <li>✓ Congelación inmediata para retener frescura.</li>
               </ul>
             </div>
           </div>
           <div style={sectionTextStyle}>
-            <span style={{ color: 'var(--color-success)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>PRODUCTORES & SOCIOS</span>
-            <h2 style={sectionTitleStyle}>¿Cultivas fresas, arándanos, frambuesas o moras?</h2>
+            <span style={{ color: 'var(--color-success)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>DE LA TIERRA A TU NEGOCIO</span>
+            <h2 style={sectionTitleStyle}>Nuestro Origen y Garantía de Calidad</h2>
             <p style={sectionDescStyle}>
-              En Fresh Frut valoramos tu trabajo. Te ofrecemos un canal de comercialización directo con exportación garantizada a Norteamérica, Europa y Asia. Monitoreamos la recepción y calidad con total transparencia financiera.
+              Seleccionamos las mejores cosechas frescas directamente de huertos locales asociados. Procesamos las berries de inmediato en nuestra planta agroindustrial, sometiéndolas a un riguroso control y limpieza antes de su congelado y empaquetado. Esto garantiza que recibas fruta con la máxima frescura y calidad intacta.
             </p>
-            <button onClick={() => setActiveModal('producer')} style={sectionBtnStyle} className="btn-primary">
-              Registrar Lote para Envío <ArrowRight size={16} />
-            </button>
           </div>
         </div>
       </section>
@@ -184,81 +188,53 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
       <section id="compradores" style={buyersSectionBgStyle}>
         <div className="landing-grid">
           <div style={sectionTextStyle}>
-            <span style={{ color: 'var(--color-blueberry)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>COMPRADORES & CLIENTES</span>
-            <h2 style={sectionTitleStyle}>Abastecimiento global seguro y confiable</h2>
+            <span style={{ color: 'var(--color-blueberry)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>CLIENTES & DISTRIBUIDORES</span>
+            <h2 style={sectionTitleStyle}>Venta de Berries Congeladas y Empacadas</h2>
             <p style={sectionDescStyle}>
-              Adquiere lotes certificados y listos para exportación. Garantizamos el cumplimiento de las normas de inocuidad alimentaria y niveles óptimos de madurez. Conoce nuestra disponibilidad en bodega en tiempo real.
+              Comercializamos y vendemos fresas, arándanos, frambuesas y moras congeladas de primera calidad. Abastecemos a marcas de alimentos, cadenas de supermercados y distribuidores de foodservice. Entregamos fruta empacada y lista en la presentación que necesites (retail, foodservice o granel industrial).
             </p>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button 
                 onClick={() => setActiveModal('buyer_catalog')} 
-                style={{ ...sectionBtnStyle, background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blueberry-dark) 100%)' }} 
+                style={{ 
+                  ...sectionBtnStyle, 
+                  background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blueberry-dark) 100%)',
+                  color: 'white'
+                }} 
                 className="btn-primary"
               >
-                Ver Disponibilidad en Bodega <ShoppingCart size={16} />
+                Ver Catálogo de Venta <ShoppingCart size={16} />
               </button>
             </div>
           </div>
           <div style={sectionImageContainerStyle}>
             <div style={{ ...imagePlaceholderStyle, border: '1px solid rgba(59, 130, 246, 0.2)' }} className="glass-panel">
               <Award size={48} color="var(--color-blueberry)" style={{ marginBottom: '16px' }} />
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Garantía Fresh Frut</h2>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Soluciones de Empaque B2B</h2>
               <ul style={listStyle}>
-                <li>✓ Fruta pre-enfriada por aire forzado.</li>
-                <li>✓ Cadena de frío controlada a 0.5 °C.</li>
-                <li>✓ Reportes QC descargables digitales.</li>
-                <li>✓ Trazabilidad por código QR de tarima.</li>
+                <li>✓ Bolsa Retail: Stand-up Pouch o Almohada (300g, 500g, 1kg).</li>
+                <li>✓ Caja Foodservice: Caja de cartón con liner (5kg y 10kg).</li>
+                <li>✓ Granel Industrial: Cajas de 20kg+ y Octobines.</li>
+                <li>✓ Inocuidad Garantizada: Certificaciones FDA y HACCP.</li>
               </ul>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. Quality standards */}
-      <section id="calidad" style={sectionStyle}>
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <span style={{ color: 'var(--color-strawberry)', fontWeight: 600, fontSize: '0.9rem', textTransform: 'uppercase' }}>FILOSOFÍA DE CALIDAD</span>
-          <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '6px' }}>Parámetros Críticos QC</h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '8px auto 0 auto' }}>
-            Nuestra fruta es clasificada e inspeccionada en base a estándares estrictos antes de asignarse a pedidos de exportación.
-          </p>
-        </div>
-        <div style={qcSpecsGridStyle}>
-          <div style={qcSpecCardStyle} className="glass-panel">
-            <h4 style={{ color: 'var(--color-strawberry)', fontWeight: 600 }}>Fresa (Strawberry)</h4>
-            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
-            <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>350 g/mm</strong></div>
-          </div>
-          <div style={qcSpecCardStyle} className="glass-panel">
-            <h4 style={{ color: 'var(--color-blueberry)', fontWeight: 600 }}>Arándano (Blueberry)</h4>
-            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>11.0°Bx</strong></div>
-            <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>140 g/mm</strong></div>
-          </div>
-          <div style={qcSpecCardStyle} className="glass-panel">
-            <h4 style={{ color: 'var(--color-raspberry)', fontWeight: 600 }}>Frambuesa (Raspberry)</h4>
-            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.5°Bx</strong></div>
-            <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>120 g/mm</strong></div>
-          </div>
-          <div style={qcSpecCardStyle} className="glass-panel">
-            <h4 style={{ color: 'var(--color-blackberry)', fontWeight: 600 }}>Mora (Blackberry)</h4>
-            <div style={{ borderBottom: '1px solid var(--panel-border)', padding: '8px 0' }}>Brix Mínimo: <strong>8.0°Bx</strong></div>
-            <div style={{ padding: '8px 0' }}>Firmeza Mínima: <strong>130 g/mm</strong></div>
-          </div>
-        </div>
-      </section>
 
       {/* 7. Contact Section */}
       <section id="contacto" style={contactSectionStyle} className="glass-panel">
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', width: '100%' }} className="responsive-chart-grid">
           <div>
             <h2 style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>Contáctanos</h2>
             <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', lineHeight: '1.6' }}>
-              ¿Tienes dudas sobre los procesos de entrega, precios o contratos de importación? Envíanos un mensaje y un ejecutivo especializado te asistirá.
+              ¿Tienes dudas sobre los procesos de maquila, empaque personalizado, precios por volumen o contratos de distribución de congelados? Envíanos un mensaje y te asistiremos.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={contactItemStyle}>
                 <Mail size={16} color="var(--color-strawberry)" />
-                <span>contacto@freshfrut.com</span>
+                <span>contacto@tamfresh.com</span>
               </div>
               <div style={contactItemStyle}>
                 <Phone size={16} color="var(--color-strawberry)" />
@@ -314,9 +290,17 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
 
       {/* Footer copyright */}
       <footer style={footerStyle}>
-        <p>© 2026 Fresh Frut. Todos los derechos reservados.</p>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+          <img 
+            src="/tamfresh_logo.png" 
+            alt="Tamfresh Logo" 
+            style={{ width: '24px', height: '24px', objectFit: 'contain' }}
+          />
+          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Tamfresh</span>
+        </div>
+        <p>© 2026 Tamfresh. Todos los derechos reservados.</p>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-          Tecnología de Trazabilidad y Gestión de Agro-Exportación de Berries.
+          Tecnología de Trazabilidad y Gestión Agroindustrial de Berries Congeladas y Empacadas.
         </p>
       </footer>
 
@@ -331,7 +315,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
               <button type="button" onClick={() => setActiveModal(null)} className="btn-secondary" style={{ padding: '6px' }}><X size={16} /></button>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Proporciona los datos preliminares de tu cultivo para agendar una visita de muestreo fitosanitario en huerto por nuestro personal técnico.
+              Proporciona los datos preliminares de tu cosecha fresca para programar la entrega, inspección de calidad e ingreso al proceso de congelación.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div className="form-group">
@@ -356,7 +340,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
                   onChange={(e) => setProducerForm({...producerForm, phone: e.target.value})}
                 />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Tipo de Berry</label>
                   <select 
@@ -381,7 +365,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
                   />
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Kilos Estimados</label>
                   <input 
@@ -407,7 +391,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
               </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" onClick={() => setActiveModal(null)} className="btn-secondary">Cancelar</button>
-                <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)' }}>
+                <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)', color: 'white' }}>
                   Registrar Solicitud
                 </button>
               </div>
@@ -427,7 +411,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
               <button type="button" onClick={() => setActiveModal(null)} className="btn-secondary" style={{ padding: '6px' }}><X size={16} /></button>
             </div>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Los siguientes lotes han completado con éxito la inspección fitosanitaria y están pre-enfriados en bodega, listos para carga inmediata y exportación.
+              Los siguientes lotes de berries congeladas han completado con éxito el procesamiento de empaque e inocuidad y están disponibles en bodega para carga inmediata.
             </p>
 
             <div className="table-container" style={{ maxHeight: '360px', overflowY: 'auto', border: '1px solid var(--panel-border)', borderRadius: '8px' }}>
@@ -465,7 +449,7 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
                           <button 
                             onClick={() => handleOpenQuote(lot)}
                             className="btn-primary"
-                            style={{ padding: '6px 12px', fontSize: '0.75rem', borderRadius: '6px', background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blueberry-dark) 100%)' }}
+                            style={{ padding: '6px 12px', fontSize: '0.75rem', borderRadius: '6px', background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blueberry-dark) 100%)', color: 'white' }}
                           >
                             Cotizar
                           </button>
@@ -542,17 +526,30 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
                   onChange={(e) => setQuoteForm({...quoteForm, targetCountry: e.target.value})}
                 />
               </div>
-              <div className="form-group">
-                <label className="form-label">Instrucciones o Mensaje Especial</label>
-                <textarea 
-                  className="form-input" 
-                  rows="3" 
-                  placeholder="Indica si requieres un empaque especial (clamshell, tarima armada, etc.)"
-                  style={{ resize: 'none' }}
-                  value={quoteForm.message}
-                  onChange={(e) => setQuoteForm({...quoteForm, message: e.target.value})}
-                ></textarea>
-              </div>
+            <div className="form-group">
+              <label className="form-label">Presentación de Empaque Requerido</label>
+              <select 
+                className="form-select"
+                value={quoteForm.packagingType}
+                onChange={(e) => setQuoteForm({...quoteForm, packagingType: e.target.value})}
+              >
+                <option value="Bolsa Retail (300g - 1kg)">Bolsa Retail (300g - 1kg)</option>
+                <option value="Caja Foodservice (5kg - 10kg)">Caja Foodservice (5kg - 10kg)</option>
+                <option value="Granel Industrial (20kg+ / Octobines)">Granel Industrial (20kg+ / Octobines)</option>
+                <option value="Marca Privada (Private Label personalizado)">Marca Privada (Private Label personalizado)</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Instrucciones o Mensaje Especial</label>
+              <textarea 
+                className="form-input" 
+                rows="3" 
+                placeholder="Indica especificaciones adicionales de empaque, etiquetado o logística de refrigeración"
+                style={{ resize: 'none' }}
+                value={quoteForm.message}
+                onChange={(e) => setQuoteForm({...quoteForm, message: e.target.value})}
+              ></textarea>
+            </div>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" onClick={() => setActiveModal('buyer_catalog')} className="btn-secondary">Atrás</button>
                 <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blueberry-dark) 100%)' }}>
@@ -643,9 +640,9 @@ const adminButtonStyle = {
   borderRadius: '8px',
   fontSize: '0.85rem',
   fontWeight: 600,
-  background: 'linear-gradient(135deg, var(--color-strawberry) 0%, #be123c 100%)',
+  background: 'linear-gradient(135deg, var(--color-strawberry) 0%, var(--color-raspberry) 100%)',
   border: 'none',
-  color: 'var(--text-primary)'
+  color: 'white'
 };
 
 const heroSectionStyle = {
@@ -708,8 +705,8 @@ const heroCtaPrimaryStyle = {
   fontWeight: 600,
   fontSize: '0.95rem',
   textDecoration: 'none',
-  background: 'linear-gradient(135deg, var(--color-success) 0%, #047857 100%)',
-  color: 'var(--text-primary)',
+  background: 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)',
+  color: 'white',
   border: 'none'
 };
 
@@ -749,7 +746,7 @@ const imageOverlayGlow = {
   transform: 'translate(-50%, -50%)',
   width: '80%',
   height: '80%',
-  background: 'radial-gradient(circle, rgba(96, 108, 56, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
+  background: 'radial-gradient(circle, rgba(56, 189, 248, 0.2) 0%, rgba(0, 0, 0, 0) 70%)',
   zIndex: 1,
   pointerEvents: 'none'
 };

@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Plus, Calendar, User, Scale, DollarSign, MapPin, Eye, Edit2, Trash2, X } from 'lucide-react';
 
+const getLocalDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function PurchaseForm({ purchases, addPurchase, deletePurchase, editPurchase, suppliers }) {
   const [berry, setBerry] = useState('Fresa');
   const [variety, setVariety] = useState('Albion');
@@ -9,7 +17,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [kg, setKg] = useState(2500);
   const [pricePerKg, setPricePerKg] = useState(45.00);
   const [storageLocation, setStorageLocation] = useState('BODEGA');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getLocalDateString());
   const [isSuccess, setIsSuccess] = useState(false);
   const [lastRegisteredId, setLastRegisteredId] = useState('');
   const [isCredit, setIsCredit] = useState('NO');
@@ -24,9 +32,9 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
 
-  // Helper to determine start and end date of the selected preset based on "today" = 2026-06-03
+  // Helper to determine start and end date of the selected preset
   const getFilterRange = () => {
-    const today = new Date('2026-06-03'); // Anchor today's date to system time for simulation
+    const today = new Date(); // Synchronized with browser's local timezone
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -112,16 +120,23 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     const finalProducer = producer === 'OTRO' ? customProducer : producer;
     if (!finalProducer) return;
 
+    const finalKg = parseInt(kg) || 0;
+    const finalPrice = parseFloat(pricePerKg) || 0;
+    if (finalKg <= 0 || finalPrice <= 0) {
+      alert("Por favor ingrese una cantidad y precio por kg válidos mayores a 0.");
+      return;
+    }
+
     const id = `LOT-${berry.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const totalCost = kg * pricePerKg;
+    const totalCost = finalKg * finalPrice;
 
     const newPurchase = {
       id,
       berry,
       variety,
       producer: finalProducer,
-      kg,
-      pricePerKg,
+      kg: finalKg,
+      pricePerKg: finalPrice,
       totalCost,
       storageLocation,
       date,
@@ -164,10 +179,17 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     e.preventDefault();
     if (!selectedItem) return;
 
+    const finalKg = parseInt(editKg) || 0;
+    const finalPrice = parseFloat(editPricePerKg) || 0;
+    if (finalKg <= 0 || finalPrice <= 0) {
+      alert("Por favor ingrese una cantidad y precio válidos mayores a 0.");
+      return;
+    }
+
     const updatedLot = {
       producer: editProducer,
-      kg: editKg,
-      pricePerKg: editPricePerKg,
+      kg: finalKg,
+      pricePerKg: finalPrice,
       storageLocation: editStorageLocation
     };
 
@@ -360,7 +382,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '10px' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Tipo de Berry</label>
                   <select value={berry} onChange={handleBerryChange} className="form-select">
@@ -381,7 +403,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Proveedor / Productor</label>
                   <select
@@ -425,7 +447,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                 </div>
               )}
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Cantidad Recibida (Kg)</label>
                   <div style={{ position: 'relative' }}>
@@ -433,7 +455,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                     <input
                       type="number"
                       value={kg}
-                      onChange={(e) => setKg(Math.max(1, parseInt(e.target.value) || 0))}
+                      onChange={(e) => setKg(e.target.value)}
                       className="form-input"
                       style={{ width: '100%', paddingLeft: '36px' }}
                       min={1}
@@ -450,7 +472,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                       type="number"
                       step="0.01"
                       value={pricePerKg}
-                      onChange={(e) => setPricePerKg(Math.max(0.1, parseFloat(e.target.value) || 0))}
+                      onChange={(e) => setPricePerKg(e.target.value)}
                       className="form-input"
                       style={{ width: '100%', paddingLeft: '36px' }}
                       required
@@ -459,7 +481,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Tipo de Pago</label>
                   <select
@@ -571,13 +593,13 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
 
               <div className="form-group">
                 <label className="form-label">Cantidad Inicial (Kg)</label>
-                <input type="number" value={editKg} onChange={(e) => setEditKg(parseInt(e.target.value) || 0)} className="form-input" required min={selectedItem.kg - selectedItem.remainingKg} />
+                <input type="number" value={editKg} onChange={(e) => setEditKg(e.target.value)} className="form-input" required min={selectedItem.kg - selectedItem.remainingKg} />
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Mínimo requerido para cubrir ventas actuales: {selectedItem.kg - selectedItem.remainingKg} kg</span>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Precio por Kg (MXN)</label>
-                <input type="number" step="0.01" value={editPricePerKg} onChange={(e) => setEditPricePerKg(parseFloat(e.target.value) || 0)} className="form-input" required />
+                <input type="number" step="0.01" value={editPricePerKg} onChange={(e) => setEditPricePerKg(e.target.value)} className="form-input" required />
               </div>
 
               <div className="form-group">

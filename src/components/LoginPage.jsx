@@ -14,8 +14,11 @@ export default function LoginPage({ onLogin, onBack }) {
 
     // Simulated short latency for auth checking feel
     setTimeout(() => {
-      if (email.trim() === 'admin@freshfrut.com' && password === 'admin123') {
-        onLogin(email, password);
+      const emailTrim = email.trim().toLowerCase();
+      if (emailTrim === 'admin@tamfresh.com' && password === 'admin123') {
+        onLogin(emailTrim, 'admin');
+      } else if (emailTrim === 'operador@tamfresh.com' && password === 'operador123') {
+        onLogin(emailTrim, 'operator');
       } else {
         setError('Credenciales inválidas. Por favor, verifica tu correo y contraseña.');
         setIsLoading(false);
@@ -31,13 +34,18 @@ export default function LoginPage({ onLogin, onBack }) {
 
       <div className="glass-panel animate-slide-up" style={cardStyle}>
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <div style={logoWrapperStyle}>
-            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-              Fresh<span style={{ color: 'var(--color-strawberry)' }}>Frut</span>
+        <div style={{ textAlign: 'center', marginBottom: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <div style={{ ...logoWrapperStyle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img 
+              src="/tamfresh_logo.png" 
+              alt="Tamfresh Logo" 
+              style={{ width: '36px', height: '36px', objectFit: 'contain' }}
+            />
+            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-title)' }}>
+              Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
             </span>
           </div>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px', fontWeight: 500 }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '12px', fontWeight: 500 }}>
             PORTAL ADMINISTRATIVO INTERNO
           </p>
         </div>
@@ -57,7 +65,7 @@ export default function LoginPage({ onLogin, onBack }) {
               <input
                 type="email"
                 className="form-input"
-                placeholder="ejemplo@freshfrut.com"
+                placeholder="ejemplo@tamfresh.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={inputStyle}
@@ -105,9 +113,9 @@ export default function LoginPage({ onLogin, onBack }) {
           <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
             Acceso Demostrativo:
           </h4>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            <div>Usuario: <strong style={{ color: 'var(--color-blueberry)' }}>admin@freshfrut.com</strong></div>
-            <div>Contraseña: <strong style={{ color: 'var(--color-blueberry)' }}>admin123</strong></div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <div>Administrador: <strong style={{ color: 'var(--color-blueberry)' }}>admin@tamfresh.com</strong> (Clave: admin123)</div>
+            <div>Operador: <strong style={{ color: 'var(--color-blueberry)' }}>operador@tamfresh.com</strong> (Clave: operador123)</div>
           </div>
         </div>
       </div>

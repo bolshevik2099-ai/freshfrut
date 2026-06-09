@@ -1,11 +1,19 @@
 import React, { useState } from 'react';
 import { Wallet, Plus, Calendar, FileText, DollarSign, Tag, Edit2, Trash2, X, Eye } from 'lucide-react';
 
+const getLocalDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function ExpensesList({ expenses, addExpense, editExpense, deleteExpense }) {
   const [description, setDescription] = useState('');
   const [type, setType] = useState('Empaque');
   const [amount, setAmount] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(getLocalDateString());
   const [isSuccess, setIsSuccess] = useState(false);
   const [datePreset, setDatePreset] = useState('ALL');
   const [customStart, setCustomStart] = useState('');
@@ -29,9 +37,9 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
     'Otros': 'var(--text-muted)'
   };
 
-  // Helper to determine start and end date of the selected preset based on "today" = 2026-06-03
+  // Helper to determine start and end date of the selected preset
   const getFilterRange = () => {
-    const today = new Date('2026-06-03'); // Anchor today's date to system time for simulation
+    const today = new Date(); // Synchronized with browser's local timezone
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -134,7 +142,7 @@ export default function ExpensesList({ expenses, addExpense, editExpense, delete
     setDescription('');
     setType('Empaque');
     setAmount('');
-    setDate(new Date().toISOString().split('T')[0]);
+    setDate(getLocalDateString());
 
     setTimeout(() => {
       setIsSuccess(false);

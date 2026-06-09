@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TrendingUp, Truck, Package, Thermometer, ShieldAlert, ArrowUpRight, ShoppingCart, Wallet, Calendar } from 'lucide-react';
 
-export default function Dashboard({ purchases, sales, expenses = [] }) {
+export default function Dashboard({ purchases, sales, expenses = [], debts = [], userRole = 'admin', lastOperatorActivity = null }) {
   const [selectedBerryFilter, setSelectedBerryFilter] = useState('Todos');
   const [datePreset, setDatePreset] = useState('ALL');
   const [customStart, setCustomStart] = useState('');
@@ -9,7 +9,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
 
   // Helper to determine start and end date of the selected preset based on "today" = 2026-06-03
   const getFilterRange = () => {
-    const today = new Date('2026-06-03'); // Anchor today's date to system time for simulation
+    const today = new Date(); // Synchronized with browser's local timezone
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -67,9 +67,13 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
     return true;
   };
 
-  // Filter global states
-  const filteredPurchases = purchases.filter(p => isWithinDateRange(p.date));
-  const filteredSales = sales.filter(s => isWithinDateRange(s.date));
+  // Filter global states by date AND berry selection
+  const filteredPurchases = purchases.filter(
+    p => isWithinDateRange(p.date) && (selectedBerryFilter === 'Todos' || p.berry === selectedBerryFilter)
+  );
+  const filteredSales = sales.filter(
+    s => isWithinDateRange(s.date) && (selectedBerryFilter === 'Todos' || s.berry === selectedBerryFilter)
+  );
   const filteredExpenses = expenses.filter(e => isWithinDateRange(e.date));
 
   // Compute live stats from filtered data (MXN)
@@ -84,6 +88,34 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
   // Operational Expenses calculations
   const totalExpenses = filteredExpenses.reduce((sum, e) => sum + e.amount, 0);
   const netProfit = totalProfit - totalExpenses;
+  
+  // Calculated KPIs
+  const avgCostPerKg = totalKgsReceived > 0 ? totalCost / totalKgsReceived : 0;
+  const avgPricePerKg = totalKgsSold > 0 ? totalRevenue / totalKgsSold : 0;
+  const netMarginPercent = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+
+  // Credit and Debts calculations
+  // Credit and Debts calculations (filtered by date and berry fruit)
+  const filteredDebts = (debts || []).filter(d => {
+    if (!isWithinDateRange(d.date)) return false;
+    if (selectedBerryFilter === 'Todos') return true;
+    if (d.type === 'PAYABLE') {
+      const p = purchases.find(purch => purch.id === d.sourceId);
+      return p && p.berry === selectedBerryFilter;
+    }
+    if (d.type === 'RECEIVABLE') {
+      const s = sales.find(sale => sale.id === d.sourceId);
+      return s && s.berry === selectedBerryFilter;
+    }
+    return false;
+  });
+  const totalReceivable = filteredDebts
+    .filter(d => d.type === 'RECEIVABLE')
+    .reduce((sum, d) => sum + d.remainingAmount, 0);
+  const totalPayable = filteredDebts
+    .filter(d => d.type === 'PAYABLE')
+    .reduce((sum, d) => sum + d.remainingAmount, 0);
+  const creditsBalance = totalReceivable - totalPayable;
   
   const pendingInspectionCount = filteredPurchases.filter(p => p.qcStatus === 'PENDING').length;
   const inStockCount = filteredPurchases.filter(p => p.qcStatus !== 'PENDING' && p.qcStatus !== 'REJECTED' && p.remainingKg > 0).length;
@@ -113,7 +145,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
 
   const expenseTotals = {};
   expenseCategories.forEach(cat => { expenseTotals[cat] = 0; });
-  expenses.forEach(e => {
+  filteredExpenses.forEach(e => {
     if (expenseTotals[e.type] !== undefined) {
       expenseTotals[e.type] += e.amount;
     } else {
@@ -121,12 +153,12 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
     }
   });
 
-  const grandTotalExpenses = Object.values(expenseTotals).reduce((a, b) => a + b, 0) || 1;
+  const grandTotalExpenses = Object.values(expenseTotals).reduce((a, b) => a + b, 0);
 
   let accumulatedPercent = 0;
   const segments = Object.keys(expenseTotals).map(cat => {
     const amt = expenseTotals[cat];
-    const pct = amt / grandTotalExpenses;
+    const pct = grandTotalExpenses === 0 ? 0 : amt / grandTotalExpenses;
     const strokeLength = pct * 314.159;
     const strokeOffset = 314.159 - (accumulatedPercent * 314.159);
     accumulatedPercent += pct;
@@ -155,6 +187,16 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
     });
   }
   const conicGradientString = `conic-gradient(${gradientParts.join(', ')})`;
+
+  // Calculate stock in bodega for each berry
+  const bodegaStockByBerry = { Fresa: 0, Arándano: 0, Frambuesa: 0, Mora: 0 };
+  filteredPurchases.forEach(p => {
+    if (p.storageLocation === 'BODEGA') {
+      bodegaStockByBerry[p.berry] = (bodegaStockByBerry[p.berry] || 0) + p.remainingKg;
+    }
+  });
+
+  const maxStock = Math.max(...Object.values(bodegaStockByBerry), 1000);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -204,6 +246,19 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <select
+            value={selectedBerryFilter}
+            onChange={(e) => setSelectedBerryFilter(e.target.value)}
+            className="form-select"
+            style={{ width: '150px', fontSize: '0.85rem', padding: '8px 14px' }}
+          >
+            <option value="Todos">Fruto: Todos</option>
+            <option value="Fresa">Fresa</option>
+            <option value="Arándano">Arándano</option>
+            <option value="Frambuesa">Frambuesa</option>
+            <option value="Mora">Mora</option>
+          </select>
+
           <select
             value={datePreset}
             onChange={(e) => setDatePreset(e.target.value)}
@@ -260,8 +315,9 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '4px', fontFamily: 'var(--font-title)' }}>
             {totalKgsReceived.toLocaleString()} kg
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Inversión: <strong style={{ color: 'var(--text-primary)' }}>${totalCost.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>Inversión: <strong style={{ color: 'var(--text-primary)' }}>${totalCost.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong></span>
+            <span>Costo Promedio: <strong style={{ color: 'var(--text-primary)' }}>${avgCostPerKg.toFixed(2)} MXN/kg</strong></span>
           </p>
         </div>
 
@@ -278,8 +334,9 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '4px', fontFamily: 'var(--font-title)' }}>
             {totalKgsSold.toLocaleString()} kg
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Facturado: <strong style={{ color: 'var(--text-primary)' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            <span>Facturado: <strong style={{ color: 'var(--text-primary)' }}>${totalRevenue.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN</strong></span>
+            <span>Precio Promedio: <strong style={{ color: 'var(--text-primary)' }}>${avgPricePerKg.toFixed(2)} MXN/kg</strong></span>
           </p>
         </div>
 
@@ -314,9 +371,14 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
           <h2 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '4px', fontFamily: 'var(--font-title)', color: 'var(--color-strawberry-hover)' }}>
             -${totalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
             Empaque, fletes, nómina e insumos
           </p>
+          {selectedBerryFilter !== 'Todos' && (
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontStyle: 'italic' }}>
+              * Gastos totales de planta (no segmentados)
+            </p>
+          )}
         </div>
 
         {/* KPI 5: Utilidad Neta */}
@@ -343,9 +405,15 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
           }}>
             {netProfit < 0 ? '-' : '+'}${Math.abs(netProfit).toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN
           </h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-            Ganancia neta tras gastos
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '2px', margin: 0 }}>
+            <span>Ganancia neta tras gastos</span>
+            <span>Margen Neto: <strong style={{ color: netProfit >= 0 ? 'var(--color-success)' : 'var(--color-strawberry-hover)' }}>{netMarginPercent.toFixed(1)}%</strong></span>
           </p>
+          {selectedBerryFilter !== 'Todos' && (
+            <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontStyle: 'italic' }}>
+              * Utilidad con gastos totales cargados
+            </p>
+          )}
         </div>
 
         {/* KPI 6: Inventario & Tránsito */}
@@ -367,72 +435,176 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
         </div>
       </div>
 
+      {/* Sección de Créditos y Finanzas B2B */}
+      <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <h3 style={{ fontSize: '1.15rem', fontFamily: 'var(--font-title)', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', margin: 0 }}>
+          <span style={{ width: '4px', height: '18px', background: 'var(--color-blueberry)', borderRadius: '2px', display: 'inline-block' }}></span>
+          Balance de Créditos B2B y Cuentas por Cobrar/Pagar
+        </h3>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          gap: '20px'
+        }}>
+          {/* Cuentas por Cobrar */}
+          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                Por Cobrar (Clientes B2B)
+              </span>
+              <div style={{ padding: '6px', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-blueberry)' }}>
+                <TrendingUp size={16} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px', fontFamily: 'var(--font-title)', color: 'var(--color-blueberry)' }}>
+              ${totalReceivable.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN
+            </h2>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Créditos pendientes de cobro por ventas
+            </p>
+          </div>
+
+          {/* Cuentas por Pagar */}
+          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                Por Pagar (Productores)
+              </span>
+              <div style={{ padding: '6px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--color-danger)' }}>
+                <Wallet size={16} />
+              </div>
+            </div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: '2px', fontFamily: 'var(--font-title)', color: 'var(--color-danger)' }}>
+              ${totalPayable.toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN
+            </h2>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Saldos pendientes de pago por fruta fresca
+            </p>
+          </div>
+
+          {/* Balance Financiero Neto */}
+          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
+                Balance de Cartera Neto
+              </span>
+              <div style={{
+                padding: '6px',
+                borderRadius: '6px',
+                background: creditsBalance >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(249, 115, 22, 0.1)',
+                color: creditsBalance >= 0 ? 'var(--color-success)' : 'var(--color-warning)'
+              }}>
+                <ArrowUpRight size={16} />
+              </div>
+            </div>
+            <h2 style={{
+              fontSize: '1.4rem',
+              fontWeight: 700,
+              marginBottom: '2px',
+              fontFamily: 'var(--font-title)',
+              color: creditsBalance >= 0 ? 'var(--color-success)' : 'var(--color-warning)'
+            }}>
+              {creditsBalance < 0 ? '-' : '+'}${Math.abs(creditsBalance).toLocaleString('en-US', { maximumFractionDigits: 0 })} MXN
+            </h2>
+            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              Saldo proyectado neto de cobranza
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Visual Analytics */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
         gap: '24px',
       }} className="responsive-chart-grid">
-        {/* SVG Area Chart */}
+        {/* SVG Bar Chart for Warehouse Stock */}
         <div className="glass-panel" style={{ padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
             <div>
-              <h3 style={{ fontSize: '1.25rem' }}>Tendencia de Cosecha & Exportación (Ene - Jun)</h3>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Volumen en Toneladas de embarques mensuales</p>
+              <h3 style={{ fontSize: '1.25rem' }}>Stock Actual en Bodega</h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Kilos en cámaras de refrigeración disponibles para venta</p>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              {Object.keys(berryColors).map(berry => (
-                <div key={berry} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: berryColors[berry] }}></span>
-                  <span style={{ color: 'var(--text-secondary)' }}>{berry}</span>
-                </div>
-              ))}
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Total Bodega: {Object.values(bodegaStockByBerry).reduce((a, b) => a + b, 0).toLocaleString()} kg
+              </span>
             </div>
           </div>
 
           <div style={{ position: 'relative', height: '240px', width: '100%' }}>
             <svg viewBox="0 0 600 220" style={{ width: '100%', height: '100%' }}>
-              <line x1="50" y1="20" x2="560" y2="20" stroke="rgba(255,255,255,0.05)" />
-              <line x1="50" y1="70" x2="560" y2="70" stroke="rgba(255,255,255,0.05)" />
-              <line x1="50" y1="120" x2="560" y2="120" stroke="rgba(255,255,255,0.05)" />
-              <line x1="50" y1="170" x2="560" y2="170" stroke="rgba(255,255,255,0.05)" strokeWidth="1.5" />
+              {/* Gridlines */}
+              <line x1="60" y1="20" x2="560" y2="20" stroke="rgba(255,255,255,0.05)" />
+              <line x1="60" y1="65" x2="560" y2="65" stroke="rgba(255,255,255,0.05)" />
+              <line x1="60" y1="110" x2="560" y2="110" stroke="rgba(255,255,255,0.05)" />
+              <line x1="60" y1="155" x2="560" y2="155" stroke="rgba(255,255,255,0.05)" />
+              <line x1="60" y1="175" x2="560" y2="175" stroke="rgba(255,255,255,0.05)" strokeWidth="1.5" />
               
-              <text x="25" y="24" fill="var(--text-muted)" fontSize="10">25 Ton</text>
-              <text x="25" y="74" fill="var(--text-muted)" fontSize="10">15 Ton</text>
-              <text x="25" y="124" fill="var(--text-muted)" fontSize="10">5 Ton</text>
+              {/* Y-Axis Labels */}
+              <text x="10" y="24" fill="var(--text-muted)" fontSize="9">{(maxStock).toLocaleString()} kg</text>
+              <text x="10" y="102" fill="var(--text-muted)" fontSize="9">{(maxStock / 2).toLocaleString()} kg</text>
+              <text x="10" y="179" fill="var(--text-muted)" fontSize="9">0 kg</text>
               
-              <text x="80" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">Ene</text>
-              <text x="170" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">Feb</text>
-              <text x="260" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">Mar</text>
-              <text x="350" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">Abr</text>
-              <text x="440" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">May</text>
-              <text x="530" y="200" fill="var(--text-secondary)" fontSize="11" textAnchor="middle">Jun</text>
+              {/* Bars */}
+              {['Fresa', 'Arándano', 'Frambuesa', 'Mora'].map((berry, index) => {
+                const kgs = bodegaStockByBerry[berry] || 0;
+                const barHeight = (kgs / maxStock) * 150; // max height is 150px
+                const xPos = 110 + index * 120; // 110, 230, 350, 470
+                const yPos = 175 - barHeight;
 
-              {/* Fresa */}
-              <path
-                d="M 80,150 Q 170,110 260,90 T 350,50 T 440,30 T 530,25"
-                fill="none"
-                stroke={berryColors['Fresa']}
-                strokeWidth="3.5"
-                strokeLinecap="round"
-                style={{ filter: 'drop-shadow(0px 4px 8px rgba(96, 108, 56,0.3))' }}
-              />
-              {/* Arándano */}
-              <path
-                d="M 80,165 Q 170,140 260,110 T 350,75 T 440,55 T 530,40"
-                fill="none"
-                stroke={berryColors['Arándano']}
-                strokeWidth="3"
-                strokeLinecap="round"
-              />
-              {/* Frambuesa */}
-              <path
-                d="M 80,180 Q 170,160 260,140 T 350,115 T 440,95 T 530,70"
-                fill="none"
-                stroke={berryColors['Frambuesa']}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
+                return (
+                  <g key={berry}>
+                    {/* Background track */}
+                    <rect
+                      x={xPos}
+                      y="25"
+                      width="40"
+                      height="150"
+                      rx="6"
+                      fill="rgba(255,255,255,0.02)"
+                    />
+                    {/* Actual value bar */}
+                    {kgs > 0 && (
+                      <rect
+                        x={xPos}
+                        y={yPos}
+                        width="40"
+                        height={barHeight}
+                        rx="6"
+                        fill={berryColors[berry] || '#ccc'}
+                        style={{ 
+                          filter: `drop-shadow(0px 4px 10px ${berryColors[berry]}33)`,
+                          transition: 'height 0.5s ease, y 0.5s ease'
+                        }}
+                      />
+                    )}
+                    {/* Kgs Label */}
+                    <text
+                      x={xPos + 20}
+                      y={kgs > 0 ? yPos - 8 : 170}
+                      fill={kgs > 0 ? 'var(--text-primary)' : 'var(--text-muted)'}
+                      fontSize="10"
+                      fontWeight="700"
+                      textAnchor="middle"
+                    >
+                      {kgs.toLocaleString()}
+                    </text>
+                    {/* X-Axis Label */}
+                    <text
+                      x={xPos + 20}
+                      y="198"
+                      fill="var(--text-secondary)"
+                      fontSize="11"
+                      fontWeight="600"
+                      textAnchor="middle"
+                    >
+                      {berry}
+                    </text>
+                  </g>
+                );
+              })}
             </svg>
           </div>
         </div>
@@ -490,7 +662,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
               borderRadius: '10px',
               border: '1px solid var(--panel-border)'
             }}>
-              {['Todos', 'Fresa', 'Arándano', 'Frambuesa'].map(filter => (
+              {['Todos', 'Fresa', 'Arándano', 'Frambuesa', 'Mora'].map(filter => (
                 <button
                   key={filter}
                   onClick={() => setSelectedBerryFilter(filter)}
@@ -566,6 +738,11 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
           <div>
             <h3 style={{ fontSize: '1.25rem' }}>Distribución de Gastos</h3>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Egresos clasificados por tipo de operación</p>
+            {selectedBerryFilter !== 'Todos' && (
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: '4px 0 0 0', fontStyle: 'italic' }}>
+                * Mostrando egresos totales de la planta (no segmentados por fruta)
+              </p>
+            )}
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'center', position: 'relative', height: '180px', alignItems: 'center' }}>
@@ -585,14 +762,15 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
                 width: '105px',
                 height: '105px',
                 borderRadius: '50%',
-                background: '#0f111a', // matches glass panel dark theme background
+                background: '#ffffff',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                boxShadow: 'inset 0 3px 8px rgba(30, 58, 138, 0.08)'
               }}>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 600, letterSpacing: '0.05em' }}>GASTOS</span>
-                <span style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-primary)', marginTop: '2px', fontFamily: 'var(--mono)' }}>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>GASTOS</span>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-strawberry-hover)', marginTop: '2px', fontFamily: 'var(--font-sans)' }}>
                   ${grandTotalExpenses.toLocaleString('en-US', { maximumFractionDigits: 0 })}
                 </span>
               </div>
@@ -612,7 +790,7 @@ export default function Dashboard({ purchases, sales, expenses = [] }) {
                     ${seg.amount.toLocaleString('en-US', { maximumFractionDigits: 0 })} ({seg.percentage}%)
                   </span>
                 </div>
-                <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.03)', borderRadius: '2px', overflow: 'hidden' }}>
+                 <div style={{ width: '100%', height: '4px', background: 'rgba(30, 58, 138, 0.08)', borderRadius: '2px', overflow: 'hidden' }}>
                   <div style={{ width: `${seg.percentage}%`, height: '100%', background: seg.color, borderRadius: '2px' }}></div>
                 </div>
               </div>

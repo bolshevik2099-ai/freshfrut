@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Users, DollarSign, Wallet, LogOut } from 'lucide-react';
+import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Users, DollarSign, Wallet, LogOut, MessageSquare, Sliders, X } from 'lucide-react';
 
-export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
+export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 'admin', onClose, isMobileOpen = false }) {
   const menuItems = [
     { id: 'dashboard', label: 'Panel de Control', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventario', icon: PackageOpen },
@@ -13,25 +13,52 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
     { id: 'clients', label: 'Clientes', icon: Globe },
     { id: 'debts', label: 'Deudas (Cuentas)', icon: DollarSign },
     { id: 'expenses', label: 'Gastos de Operación', icon: Wallet },
+    ...(userRole === 'admin' ? [{ id: 'chat_config', label: 'Configurar Chat', icon: Sliders }] : [])
   ];
 
   return (
-    <aside className="sidebar glass-panel" style={{
+    <aside className={`sidebar glass-panel ${isMobileOpen ? 'mobile-open' : ''}`} style={{
       width: '260px',
       position: 'fixed',
       top: 0,
       left: 0,
       bottom: 0,
-      zIndex: 100,
+      zIndex: 1100,
       display: 'flex',
       flexDirection: 'column',
       borderRadius: 0,
+      background: 'rgba(255, 255, 255, 0.45)',
+      backdropFilter: 'blur(30px) saturate(150%)',
       borderRight: '1px solid var(--panel-border)',
       borderTop: 'none',
       borderLeft: 'none',
       borderBottom: 'none',
       padding: '24px 16px',
+      boxShadow: '0 0 20px rgba(56, 189, 248, 0.04)',
+      transition: 'transform var(--transition-normal)'
     }}>
+      {/* Mobile Close Button */}
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute',
+          top: '16px',
+          right: '16px',
+          background: 'none',
+          border: 'none',
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+          padding: '6px',
+          borderRadius: '50%',
+          display: 'none',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1200
+        }}
+        className="mobile-close-btn"
+      >
+        <X size={20} />
+      </button>
       {/* Brand Header */}
       <div style={{
         display: 'flex',
@@ -40,21 +67,14 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
         marginBottom: '40px',
         padding: '0 8px'
       }}>
-        <div style={{
-          width: '36px',
-          height: '36px',
-          borderRadius: '10px',
-          background: 'linear-gradient(135deg, var(--color-strawberry) 0%, var(--color-blackberry) 100%)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: 'var(--shadow-glow-strawberry)'
-        }}>
-          <Globe size={18} color="white" />
-        </div>
+        <img 
+          src="/tamfresh_logo.png" 
+          alt="Tamfresh Logo" 
+          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+        />
         <div>
           <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
-            Fresh<span style={{ color: 'var(--color-strawberry)' }}>Frut</span>
+            Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </h2>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>SISTEMA DE GESTIÓN</p>
         </div>
@@ -68,15 +88,18 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
           return (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                if (onClose) onClose();
+              }}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: '12px',
                 width: '100%',
                 padding: '12px 16px',
-                background: isActive ? 'rgba(96, 108, 56, 0.08)' : 'transparent',
-                color: isActive ? 'var(--color-strawberry-hover)' : 'var(--text-secondary)',
+                background: isActive ? 'rgba(30, 58, 138, 0.08)' : 'transparent',
+                color: isActive ? 'var(--color-blueberry-dark)' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '12px',
                 fontFamily: 'var(--font-sans)',
@@ -85,7 +108,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
                 cursor: 'pointer',
                 textAlign: 'left',
                 transition: 'all var(--transition-fast)',
-                borderLeft: isActive ? '3px solid var(--color-strawberry)' : '3px solid transparent',
+                borderLeft: isActive ? '3px solid var(--color-blueberry)' : '3px solid transparent',
               }}
               className={isActive ? '' : 'sidebar-item-hover'}
             >
@@ -152,9 +175,10 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout }) {
       
       <style>{`
         .sidebar-item-hover:hover {
-          background: rgba(255, 255, 255, 0.03) !important;
-          color: var(--text-primary) !important;
+          background: rgba(30, 58, 138, 0.08) !important;
+          color: var(--color-blueberry) !important;
           padding-left: 20px !important;
+          box-shadow: inset 0 0 8px rgba(30, 58, 138, 0.04);
         }
       `}</style>
     </aside>

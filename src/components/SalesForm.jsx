@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Truck, Scale, DollarSign, User, ShieldCheck, Tag, Anchor, Eye, Edit2, Trash2, X, Plus, Calendar } from 'lucide-react';
 
+const getLocalDateString = () => {
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
+
 export default function SalesForm({ purchases, sales, addSale, updatePurchaseSaleStatus, deleteSale, editSale, clients }) {
   // Available lots are those approved or warned by QC, and have remaining kilograms
   const availableLots = purchases.filter(p => 
@@ -30,9 +38,9 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
   const [customStart, setCustomStart] = useState('');
   const [customEnd, setCustomEnd] = useState('');
 
-  // Helper to determine start and end date based on simulated date "2026-06-03"
+  // Helper to determine start and end date based on local system timezone
   const getFilterRange = () => {
-    const today = new Date('2026-06-03');
+    const today = new Date(); // Synchronized with browser's local timezone
     const yyyy = today.getFullYear();
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
@@ -114,16 +122,19 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
   const handleSubmit = (e) => {
     e.preventDefault();
     const finalClient = client === 'OTRO' ? customClient : client;
-    if (!selectedLotId || !finalClient || kgToSell <= 0) return;
+    const finalKg = parseInt(kgToSell) || 0;
+    const finalPrice = parseFloat(priceSoldPerKg) || 0;
 
-    if (kgToSell > selectedLot.remainingKg) {
+    if (!selectedLotId || !finalClient || finalKg <= 0) return;
+
+    if (finalKg > selectedLot.remainingKg) {
       setErrorMsg(`No puedes vender más de los kilos disponibles (${selectedLot.remainingKg.toLocaleString()} kg).`);
       return;
     }
 
     const saleId = `EXP-${selectedLot.berry.substring(0,3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-    const totalRevenue = kgToSell * priceSoldPerKg;
-    const costOfSoldPortion = kgToSell * selectedLot.pricePerKg;
+    const totalRevenue = finalKg * finalPrice;
+    const costOfSoldPortion = finalKg * selectedLot.pricePerKg;
     const profit = totalRevenue - costOfSoldPortion;
 
     const newSale = {
@@ -131,19 +142,19 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
       purchaseId: selectedLotId,
       berry: selectedLot.berry,
       variety: selectedLot.variety,
-      kg: kgToSell,
+      kg: finalKg,
       client: finalClient,
-      priceSoldPerKg,
+      priceSoldPerKg: finalPrice,
       totalRevenue,
       profit,
       shippingLine,
       containerId: containerId || 'N/A',
       status,
-      date: new Date().toISOString().split('T')[0]
+      date: getLocalDateString()
     };
 
     addSale(newSale, isCredit === 'SI');
-    updatePurchaseSaleStatus(selectedLotId, kgToSell);
+    updatePurchaseSaleStatus(selectedLotId, finalKg);
     setIsSuccess(true);
     setErrorMsg('');
     
@@ -154,7 +165,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
     setStatus('Empaque');
 
     const updatedLot = purchases.find(p => p.id === selectedLotId);
-    const updatedRemaining = updatedLot ? (updatedLot.remainingKg - kgToSell) : 0;
+    const updatedRemaining = updatedLot ? (updatedLot.remainingKg - finalKg) : 0;
     
     if (updatedRemaining <= 0) {
       const remainingLots = availableLots.filter(l => l.id !== selectedLotId);
@@ -188,10 +199,17 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
     e.preventDefault();
     if (!selectedItem) return;
 
+    const finalKg = parseInt(editKg) || 0;
+    const finalPrice = parseFloat(editPriceSoldPerKg) || 0;
+    if (finalKg <= 0 || finalPrice <= 0) {
+      alert("Por favor ingrese una cantidad y precio de venta válidos mayores a 0.");
+      return;
+    }
+
     const updatedSale = {
       client: editClient,
-      kg: editKg,
-      priceSoldPerKg: editPriceSoldPerKg,
+      kg: finalKg,
+      priceSoldPerKg: finalPrice,
       status: editStatus,
       containerId: editContainerId,
       shippingLine: editShippingLine
@@ -441,7 +459,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                     </select>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">Seleccionar Cliente</label>
                       <select
@@ -489,7 +507,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                     </div>
                   )}
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">Kilos a Vender</label>
                       <div style={{ position: 'relative' }}>
@@ -497,7 +515,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                         <input
                           type="number"
                           value={kgToSell}
-                          onChange={(e) => setKgToSell(Math.max(1, parseInt(e.target.value) || 0))}
+                          onChange={(e) => setKgToSell(e.target.value)}
                           className="form-input"
                           style={{ width: '100%', paddingLeft: '36px' }}
                           max={selectedLot?.remainingKg || 999999}
@@ -520,7 +538,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                           type="number"
                           step="0.01"
                           value={priceSoldPerKg}
-                          onChange={(e) => setPriceSoldPerKg(Math.max(0.1, parseFloat(e.target.value) || 0))}
+                          onChange={(e) => setPriceSoldPerKg(e.target.value)}
                           className="form-input"
                           style={{ width: '100%', paddingLeft: '36px' }}
                           required
@@ -529,7 +547,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                     <div className="form-group">
                       <label className="form-label">Estatus de Fruta vendido</label>
                       <select
@@ -660,7 +678,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                 <input 
                   type="number" 
                   value={editKg} 
-                  onChange={(e) => setEditKg(parseInt(e.target.value) || 0)} 
+                  onChange={(e) => setEditKg(e.target.value)} 
                   className="form-input" 
                   required 
                   max={selectedItem.kg + (getSourceLot(selectedItem.purchaseId).remainingKg || 0)}
@@ -673,7 +691,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
 
               <div className="form-group">
                 <label className="form-label">Precio Venta por Kg (MXN)</label>
-                <input type="number" step="0.01" value={editPriceSoldPerKg} onChange={(e) => setEditPriceSoldPerKg(parseFloat(e.target.value) || 0)} className="form-input" required />
+                <input type="number" step="0.01" value={editPriceSoldPerKg} onChange={(e) => setEditPriceSoldPerKg(e.target.value)} className="form-input" required />
               </div>
 
               <div className="form-group">
@@ -688,7 +706,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                 </select>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }} className="form-row-responsive">
                 <div className="form-group">
                   <label className="form-label">Contenedor</label>
                   <input type="text" value={editContainerId} onChange={(e) => setEditContainerId(e.target.value)} className="form-input" />
