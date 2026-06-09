@@ -33,7 +33,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       borderTop: 'none',
       borderLeft: 'none',
       borderBottom: 'none',
-      padding: '24px 16px',
+      padding: '12px 16px',
       boxShadow: '0 0 20px rgba(56, 189, 248, 0.04)',
       transition: 'transform var(--transition-normal)'
     }}>
@@ -63,25 +63,25 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '12px',
-        marginBottom: '30px',
-        padding: '0 8px'
+        gap: '8px',
+        marginBottom: '12px',
+        padding: '0 4px'
       }}>
         <img 
           src="/tamfresh_logo.png" 
           alt="Tamfresh Logo" 
-          style={{ width: '115px', height: '115px', objectFit: 'contain' }}
+          style={{ width: '80px', height: '80px', objectFit: 'contain' }}
         />
         <div>
-          <h2 style={{ fontSize: '1.6rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.4rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
             Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </h2>
-          <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>SISTEMA DE GESTIÓN</p>
+          <p style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '2px' }}>SISTEMA DE GESTIÓN</p>
         </div>
       </div>
 
       {/* Menu Navigation */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id;
@@ -97,13 +97,13 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
                 alignItems: 'center',
                 gap: '12px',
                 width: '100%',
-                padding: '12px 16px',
+                padding: '8px 12px',
                 background: isActive ? 'rgba(30, 58, 138, 0.08)' : 'transparent',
                 color: isActive ? 'var(--color-blueberry-dark)' : 'var(--text-secondary)',
                 border: 'none',
-                borderRadius: '12px',
+                borderRadius: '8px',
                 fontFamily: 'var(--font-sans)',
-                fontSize: '0.9rem',
+                fontSize: '0.85rem',
                 fontWeight: isActive ? 600 : 500,
                 cursor: 'pointer',
                 textAlign: 'left',
@@ -112,7 +112,7 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
               }}
               className={isActive ? '' : 'sidebar-item-hover'}
             >
-              <Icon size={18} />
+              <Icon size={16} />
               {item.label}
             </button>
           );
@@ -122,11 +122,11 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       {/* Footer Info / DB Connection State */}
       <div style={{
         marginTop: 'auto',
-        padding: '16px 8px',
+        padding: '10px 4px',
         borderTop: '1px solid var(--panel-border)',
         display: 'flex',
         flexDirection: 'column',
-        gap: '12px'
+        gap: '8px'
       }}>
         <button
           onClick={onLogout}
@@ -136,27 +136,27 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
             alignItems: 'center',
             gap: '12px',
             width: '100%',
-            padding: '10px 16px',
+            padding: '6px 12px',
             background: 'rgba(239, 68, 68, 0.05)',
             color: 'var(--color-danger)',
             border: '1px solid rgba(239, 68, 68, 0.1)',
-            borderRadius: '10px',
+            borderRadius: '8px',
             fontFamily: 'var(--font-sans)',
-            fontSize: '0.85rem',
+            fontSize: '0.8rem',
             fontWeight: 500,
             cursor: 'pointer',
             textAlign: 'left',
             transition: 'all var(--transition-fast)',
-            marginBottom: '8px'
+            marginBottom: '4px'
           }}
         >
           <LogOut size={16} />
           Cerrar Sesión
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div className="pulse-dot"></div>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
             Base de datos conectada
           </span>
         </div>
@@ -164,9 +164,9 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
         <div style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: '6px',
           color: 'var(--text-muted)',
-          fontSize: '0.7rem'
+          fontSize: '0.65rem'
         }}>
           <Database size={12} />
           <span>v2.4.1-stable</span>
