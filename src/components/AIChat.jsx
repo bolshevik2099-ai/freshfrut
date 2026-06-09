@@ -405,7 +405,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             bottom: '92px',
             right: '24px',
             width: '420px',
-            height: '580px',
+            height: '660px',
             zIndex: 10000,
             display: 'flex',
             flexDirection: 'column',
@@ -430,15 +430,15 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             background: 'rgba(255, 255, 255, 0.3)',
             flexShrink: 0
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <img 
                 src="/tamfresh_logo.png" 
                 alt="Tamfresh Logo" 
-                style={{ width: '50px', height: '50px', objectFit: 'contain' }}
+                style={{ width: '145px', height: '145px', objectFit: 'contain' }}
               />
               <div>
-                <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700, color: 'var(--text-primary)' }}>Asistente Tamfresh IA</h3>
-                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Conectado a la Base de Datos</span>
+                <h3 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700, color: 'var(--text-primary)' }}>Asistente Tamfresh IA</h3>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Conectado a la Base de Datos</span>
               </div>
             </div>
             <button

@@ -35,13 +35,13 @@ export default function LoginPage({ onLogin, onBack }) {
       <div className="glass-panel animate-slide-up" style={cardStyle}>
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ ...logoWrapperStyle, display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 20px' }}>
+          <div style={{ ...logoWrapperStyle, display: 'flex', alignItems: 'center', gap: '16px', padding: '12px 24px' }}>
             <img 
               src="/tamfresh_logo.png" 
               alt="Tamfresh Logo" 
-              style={{ width: '62px', height: '62px', objectFit: 'contain' }}
+              style={{ width: '178px', height: '178px', objectFit: 'contain' }}
             />
-            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-title)' }}>
+            <span style={{ fontSize: '3.2rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-title)' }}>
               Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
             </span>
           </div>

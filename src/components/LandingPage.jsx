@@ -88,9 +88,9 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
           <img 
             src="/tamfresh_logo.png" 
             alt="Tamfresh Logo" 
-            style={{ width: '54px', height: '54px', objectFit: 'contain' }}
+            style={{ width: '156px', height: '156px', objectFit: 'contain' }}
           />
-          <span style={{ fontSize: '1.5rem', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
+          <span style={{ fontSize: '2.6rem', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
             Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </span>
         </div>
@@ -290,13 +290,13 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
 
       {/* Footer copyright */}
       <footer style={footerStyle}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
           <img 
             src="/tamfresh_logo.png" 
             alt="Tamfresh Logo" 
-            style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+            style={{ width: '116px', height: '116px', objectFit: 'contain' }}
           />
-          <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>Tamfresh</span>
+          <span style={{ fontWeight: 700, fontSize: '2.0rem' }}>Tamfresh</span>
         </div>
         <p>© 2026 Tamfresh. Todos los derechos reservados.</p>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
@@ -592,7 +592,7 @@ const layoutStyle = {
   backgroundImage: 'var(--bg-gradient)',
   backgroundAttachment: 'fixed',
   position: 'relative',
-  paddingTop: '80px' // offset header height
+  paddingTop: '180px' // offset header height
 };
 
 const headerStyle = {
@@ -600,7 +600,7 @@ const headerStyle = {
   top: '0',
   left: '0',
   right: '0',
-  height: '80px',
+  height: '180px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',

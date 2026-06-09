@@ -537,7 +537,7 @@ function App() {
         top: 0,
         left: 0,
         right: 0,
-        height: '60px',
+        height: '160px',
         zIndex: 1000,
         display: 'none', // Managed in CSS via media queries
         alignItems: 'center',
@@ -562,8 +562,8 @@ function App() {
         >
           <Menu size={24} />
         </button>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-title)' }}>
-          <img src="/tamfresh_logo.png" alt="Tamfresh Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '2.4rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-title)' }}>
+          <img src="/tamfresh_logo.png" alt="Tamfresh Logo" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
           Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
         </span>
         <div style={{ width: '40px' }}></div> {/* Spacer to center title */}
