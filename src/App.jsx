@@ -562,8 +562,8 @@ function App() {
         >
           <Menu size={24} />
         </button>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-title)' }}>
-          <img src="/tamfresh_logo.png" alt="Tamfresh Logo" style={{ width: '28px', height: '28px', objectFit: 'contain' }} />
+        <span style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', fontFamily: 'var(--font-title)' }}>
+          <img src="/tamfresh_logo.png" alt="Tamfresh Logo" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
           Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
         </span>
         <div style={{ width: '40px' }}></div> {/* Spacer to center title */}

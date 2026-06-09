@@ -64,16 +64,16 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        marginBottom: '40px',
+        marginBottom: '30px',
         padding: '0 8px'
       }}>
         <img 
           src="/tamfresh_logo.png" 
           alt="Tamfresh Logo" 
-          style={{ width: '40px', height: '40px', objectFit: 'contain' }}
+          style={{ width: '68px', height: '68px', objectFit: 'contain' }}
         />
         <div>
-          <h2 style={{ fontSize: '1.25rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
+          <h2 style={{ fontSize: '1.4rem', margin: 0, fontWeight: 700, letterSpacing: '-0.02em' }}>
             Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </h2>
           <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 500 }}>SISTEMA DE GESTIÓN</p>

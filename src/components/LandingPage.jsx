@@ -84,13 +84,13 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
     <div style={layoutStyle} className="landing-layout">
       {/* 1. Header & Navigation */}
       <header style={headerStyle} className="glass-panel landing-header">
-        <div style={{ ...logoStyle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ ...logoStyle, display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img 
             src="/tamfresh_logo.png" 
             alt="Tamfresh Logo" 
-            style={{ width: '32px', height: '32px', objectFit: 'contain' }}
+            style={{ width: '54px', height: '54px', objectFit: 'contain' }}
           />
-          <span style={{ fontSize: '1.25rem', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
+          <span style={{ fontSize: '1.5rem', fontWeight: 800, fontFamily: 'var(--font-title)' }}>
             Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
           </span>
         </div>
@@ -290,13 +290,13 @@ export default function LandingPage({ onNavigateToLogin, purchases }) {
 
       {/* Footer copyright */}
       <footer style={footerStyle}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
           <img 
             src="/tamfresh_logo.png" 
             alt="Tamfresh Logo" 
-            style={{ width: '24px', height: '24px', objectFit: 'contain' }}
+            style={{ width: '40px', height: '40px', objectFit: 'contain' }}
           />
-          <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Tamfresh</span>
+          <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>Tamfresh</span>
         </div>
         <p>© 2026 Tamfresh. Todos los derechos reservados.</p>
         <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>

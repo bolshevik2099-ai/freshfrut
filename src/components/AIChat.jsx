@@ -430,11 +430,11 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             background: 'rgba(255, 255, 255, 0.3)',
             flexShrink: 0
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <img 
                 src="/tamfresh_logo.png" 
                 alt="Tamfresh Logo" 
-                style={{ width: '30px', height: '30px', objectFit: 'contain' }}
+                style={{ width: '50px', height: '50px', objectFit: 'contain' }}
               />
               <div>
                 <h3 style={{ fontSize: '0.95rem', margin: 0, fontWeight: 700, color: 'var(--text-primary)' }}>Asistente Tamfresh IA</h3>

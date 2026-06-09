@@ -35,13 +35,13 @@ export default function LoginPage({ onLogin, onBack }) {
       <div className="glass-panel animate-slide-up" style={cardStyle}>
         {/* Brand Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <div style={{ ...logoWrapperStyle, display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ ...logoWrapperStyle, display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 20px' }}>
             <img 
               src="/tamfresh_logo.png" 
               alt="Tamfresh Logo" 
-              style={{ width: '36px', height: '36px', objectFit: 'contain' }}
+              style={{ width: '62px', height: '62px', objectFit: 'contain' }}
             />
-            <span style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-title)' }}>
+            <span style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-title)' }}>
               Tam<span style={{ color: 'var(--color-success)' }}>fresh</span>
             </span>
           </div>
@@ -107,17 +107,6 @@ export default function LoginPage({ onLogin, onBack }) {
             )}
           </button>
         </form>
-
-        {/* Demo Credentials Box */}
-        <div style={demoBoxStyle}>
-          <h4 style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
-            Acceso Demostrativo:
-          </h4>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <div>Administrador: <strong style={{ color: 'var(--color-blueberry)' }}>admin@tamfresh.com</strong> (Clave: admin123)</div>
-            <div>Operador: <strong style={{ color: 'var(--color-blueberry)' }}>operador@tamfresh.com</strong> (Clave: operador123)</div>
-          </div>
-        </div>
       </div>
     </div>
   );
