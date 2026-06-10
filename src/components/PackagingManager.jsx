@@ -528,20 +528,27 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
                       <th>Comprador Asociado</th>
                       <th style={{ textAlign: 'right' }}>En Bodega (Stock)</th>
                       <th style={{ textAlign: 'right' }}>Prestado a Productores</th>
-                      <th style={{ textAlign: 'right' }}>Total Consignado</th>
+                      <th style={{ textAlign: 'right' }}>Regresado</th>
+                      <th style={{ textAlign: 'right' }}>Cantidad a Regresar</th>
                       <th style={{ textAlign: 'center' }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {materials.length === 0 ? (
                       <tr>
-                        <td colSpan="7" style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
+                        <td colSpan="8" style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
                           No hay cajas de empaque registradas en el catálogo. Usa el botón "Crear Tipo de Caja".
                         </td>
                       </tr>
                     ) : (
                       materials.map(mat => {
                         const clientName = clients.find(c => c.id === mat.client_id)?.name || 'General / Propio';
+                        const returnedFromProd = transactions
+                          .filter(t => t.material_id === mat.id && t.type === 'RETURNED_IN_PURCHASE')
+                          .reduce((sum, t) => sum + t.quantity, 0);
+                        const returnedToCli = transactions
+                          .filter(t => t.material_id === mat.id && t.type === 'SHIPPED_IN_SALE')
+                          .reduce((sum, t) => sum + t.quantity, 0);
                         return (
                           <tr key={mat.id}>
                             <td style={{ fontFamily: 'monospace', fontWeight: 600 }}>{mat.id}</td>
@@ -552,6 +559,13 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
                             </td>
                             <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-warning)' }}>
                               {mat.lent_qty.toLocaleString()}
+                            </td>
+                            <td style={{ textAlign: 'right', fontSize: '0.85rem' }}>
+                              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+                                {returnedFromProd > 0 && <span style={{ color: 'var(--color-success)', fontWeight: 500 }}>De Prod: {returnedFromProd.toLocaleString()}</span>}
+                                {returnedToCli > 0 && <span style={{ color: 'var(--color-blueberry)', fontWeight: 500 }}>A Cli: {returnedToCli.toLocaleString()}</span>}
+                                {returnedFromProd === 0 && returnedToCli === 0 && <span style={{ color: 'var(--text-muted)' }}>0</span>}
+                              </div>
                             </td>
                             <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-blueberry)' }}>
                               {mat.total_qty.toLocaleString()}

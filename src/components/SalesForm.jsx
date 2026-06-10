@@ -641,7 +641,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                         onChange={(e) => setIsConsigned(e.target.checked)}
                         style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
                       />
-                      ¿Material Consignado? (Cajas de Empaque)
+                      ¿Cajas a regresar / despachar?
                     </label>
 
                     {isConsigned && (
@@ -682,7 +682,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                       </select>
                     </div>
                         <div className="form-group">
-                          <label className="form-label">Cantidad de Cajas</label>
+                          <label className="form-label">{consignedType === 'RECEIVE_FROM_BUYER' ? 'Cantidad a regresar' : 'Cantidad a despachar'}</label>
                           <input
                             type="number"
                             className="form-input"
@@ -836,7 +836,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                     onChange={(e) => setEditIsConsigned(e.target.checked)}
                     style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
                   />
-                  ¿Material Consignado? (Cajas de Empaque)
+                  ¿Cajas a regresar / despachar?
                 </label>
 
                 {editIsConsigned && (
@@ -876,7 +876,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Cantidad de Cajas</label>
+                      <label className="form-label">{editConsignedType === 'RECEIVE_FROM_BUYER' ? 'Cantidad a regresar' : 'Cantidad a despachar'}</label>
                       <input
                         type="number"
                         className="form-input"

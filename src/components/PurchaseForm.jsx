@@ -555,7 +555,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                     onChange={(e) => setIsConsigned(e.target.checked)}
                     style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
                   />
-                  ¿Material Consignado? (Cajas de Empaque)
+                  ¿Cajas a regresar / prestar?
                 </label>
 
                 {isConsigned && (
@@ -596,7 +596,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Cantidad de Cajas</label>
+                      <label className="form-label">{consignedType === 'RETURNED_IN_PURCHASE' ? 'Cantidad a regresar' : 'Cantidad a prestar'}</label>
                       <input
                         type="number"
                         className="form-input"
@@ -728,7 +728,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                     onChange={(e) => setEditIsConsigned(e.target.checked)}
                     style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
                   />
-                  ¿Material Consignado? (Cajas de Empaque)
+                  ¿Cajas a regresar / prestar?
                 </label>
 
                 {editIsConsigned && (
@@ -768,7 +768,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                       </select>
                     </div>
                     <div className="form-group">
-                      <label className="form-label">Cantidad de Cajas</label>
+                      <label className="form-label">{editConsignedType === 'RETURNED_IN_PURCHASE' ? 'Cantidad a regresar' : 'Cantidad a prestar'}</label>
                       <input
                         type="number"
                         className="form-input"
