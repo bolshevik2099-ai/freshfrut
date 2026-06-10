@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
-import { Box, Plus, Send, RefreshCw, Calendar, Trash2, ArrowDownCircle, ArrowUpCircle, UserCheck, AlertTriangle } from 'lucide-react';
+import { Box, Plus, Send, RefreshCw, Calendar, Edit2, Trash2, ArrowDownCircle, ArrowUpCircle, UserCheck, AlertTriangle } from 'lucide-react';
 
-export default function PackagingManager({ suppliers = [], clients = [] }) {
+export default function PackagingManager({ suppliers = [], clients = [], onRefreshMaterials }) {
   const [activeSubTab, setActiveSubTab] = useState('inventory'); // 'inventory', 'suppliers_balance', 'history'
   const [materials, setMaterials] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -12,6 +12,8 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
   // Form states
   const [showAddMaterialModal, setShowAddMaterialModal] = useState(false);
   const [newMaterial, setNewMaterial] = useState({ name: '', clientId: '' });
+  const [showEditMaterialModal, setShowEditMaterialModal] = useState(false);
+  const [editingMaterial, setEditingMaterial] = useState(null); // { id: '', name: '', clientId: '' }
 
   const [showTxModal, setShowTxModal] = useState(false);
   const [txType, setTxType] = useState('RECEIVE_FROM_BUYER'); // 'RECEIVE_FROM_BUYER' or 'LEND_TO_PRODUCER'
@@ -77,9 +79,60 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
       setShowAddMaterialModal(false);
       setNewMaterial({ name: '', clientId: '' });
       fetchData();
+      if (onRefreshMaterials) onRefreshMaterials();
     } catch (err) {
       console.error("Error adding packaging material:", err);
       alert("Error al agregar el material de empaque.");
+    }
+  };
+
+  const handleOpenEditMaterial = (mat) => {
+    setEditingMaterial({
+      id: mat.id,
+      name: mat.name,
+      clientId: mat.client_id || ''
+    });
+    setShowEditMaterialModal(true);
+  };
+
+  const handleEditMaterial = async (e) => {
+    e.preventDefault();
+    if (!editingMaterial || !editingMaterial.name.trim()) return;
+
+    try {
+      const { error: updErr } = await supabase
+        .from('packaging_materials')
+        .update({
+          name: editingMaterial.name.trim(),
+          client_id: editingMaterial.clientId || null
+        })
+        .eq('id', editingMaterial.id);
+      if (updErr) throw updErr;
+
+      setShowEditMaterialModal(false);
+      setEditingMaterial(null);
+      fetchData();
+      if (onRefreshMaterials) onRefreshMaterials();
+    } catch (err) {
+      console.error("Error updating packaging material:", err);
+      alert("Error al actualizar el material de empaque.");
+    }
+  };
+
+  const handleDeleteMaterial = async (mat) => {
+    if (!confirm(`¿Estás seguro de eliminar el empaque "${mat.name}"? Esto también eliminará todos sus movimientos históricos y desvinculará los registros en compras y ventas.`)) return;
+
+    try {
+      const { error: delErr } = await supabase
+        .from('packaging_materials')
+        .delete()
+        .eq('id', mat.id);
+      if (delErr) throw delErr;
+      fetchData();
+      if (onRefreshMaterials) onRefreshMaterials();
+    } catch (err) {
+      console.error("Error deleting material:", err);
+      alert("Error al eliminar el material de empaque.");
     }
   };
 
@@ -158,6 +211,7 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
         date: new Date().toISOString().split('T')[0]
       });
       fetchData();
+      if (onRefreshMaterials) onRefreshMaterials();
     } catch (err) {
       console.error("Error creating packaging transaction:", err);
       alert("Error al procesar el movimiento de cajas.");
@@ -218,6 +272,7 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
       if (updErr) throw updErr;
 
       fetchData();
+      if (onRefreshMaterials) onRefreshMaterials();
     } catch (err) {
       console.error("Error deleting packaging transaction:", err);
       alert("Error al revertir y eliminar el movimiento.");
@@ -381,12 +436,13 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
                       <th style={{ textAlign: 'right' }}>En Bodega (Stock)</th>
                       <th style={{ textAlign: 'right' }}>Prestado a Productores</th>
                       <th style={{ textAlign: 'right' }}>Total Consignado</th>
+                      <th style={{ textAlign: 'center' }}>Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {materials.length === 0 ? (
                       <tr>
-                        <td colSpan="6" style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
+                        <td colSpan="7" style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
                           No hay cajas de empaque registradas en el catálogo. Usa el botón "Crear Tipo de Caja".
                         </td>
                       </tr>
@@ -406,6 +462,26 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
                             </td>
                             <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--color-blueberry)' }}>
                               {mat.total_qty.toLocaleString()}
+                            </td>
+                            <td style={{ textAlign: 'center' }}>
+                              <div style={{ display: 'flex', gap: '6px', justifyContent: 'center' }}>
+                                <button 
+                                  onClick={() => handleOpenEditMaterial(mat)} 
+                                  className="btn-secondary" 
+                                  style={{ padding: '6px', color: 'var(--color-blueberry)' }}
+                                  title="Editar material"
+                                >
+                                  <Edit2 size={14} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteMaterial(mat)} 
+                                  className="btn-secondary" 
+                                  style={{ padding: '6px', color: 'var(--color-danger)' }}
+                                  title="Eliminar material"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         );
@@ -573,6 +649,59 @@ export default function PackagingManager({ suppliers = [], clients = [] }) {
                 <button type="button" onClick={() => setShowAddMaterialModal(false)} className="btn-secondary">Cancelar</button>
                 <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)' }}>
                   Crear Caja
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL: EDITAR TIPO DE CAJA --- */}
+      {showEditMaterialModal && editingMaterial && (
+        <div className="modal-overlay" style={modalOverlayStyle}>
+          <div className="glass-panel modal-content" style={modalContentStyle}>
+            <div style={modalHeaderStyle}>
+              <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Box size={20} color="var(--color-success)" />
+                Editar Tipo de Caja
+              </h3>
+              <button onClick={() => { setShowEditMaterialModal(false); setEditingMaterial(null); }} className="btn-secondary" style={{ padding: '6px' }}><Plus size={16} style={{ transform: 'rotate(45deg)' }} /></button>
+            </div>
+            
+            <form onSubmit={handleEditMaterial} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="form-group">
+                <label className="form-label">Nombre del Empaque / Caja</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  placeholder="Ej: Caja Plástica Arándano Driscoll's 2kg"
+                  value={editingMaterial.name}
+                  onChange={(e) => setEditingMaterial({ ...editingMaterial, name: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Cliente/Comprador Propietario (Opcional)</label>
+                <select
+                  className="form-select"
+                  value={editingMaterial.clientId}
+                  onChange={(e) => setEditingMaterial({ ...editingMaterial, clientId: e.target.value })}
+                >
+                  <option value="">-- General / Propio (Sin dueño específico) --</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Vincula la caja a un comprador si esta es proveída por él exclusivamente para sus lotes.
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
+                <button type="button" onClick={() => { setShowEditMaterialModal(false); setEditingMaterial(null); }} className="btn-secondary">Cancelar</button>
+                <button type="submit" className="btn-primary" style={{ background: 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)' }}>
+                  Guardar Cambios
                 </button>
               </div>
             </form>

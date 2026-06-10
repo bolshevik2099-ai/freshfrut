@@ -828,6 +828,7 @@ function App() {
           <PackagingManager 
             suppliers={suppliers} 
             clients={clients} 
+            onRefreshMaterials={fetchPackagingMaterials}
           />
         )}
         
