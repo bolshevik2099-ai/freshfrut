@@ -90,7 +90,9 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
     setEditingMaterial({
       id: mat.id,
       name: mat.name,
-      clientId: mat.client_id || ''
+      clientId: mat.client_id || '',
+      stockQty: mat.stock_qty,
+      lentQty: mat.lent_qty
     });
     setShowEditMaterialModal(true);
   };
@@ -99,15 +101,41 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
     e.preventDefault();
     if (!editingMaterial || !editingMaterial.name.trim()) return;
 
+    const finalStock = parseInt(editingMaterial.stockQty) || 0;
+    const finalLent = parseInt(editingMaterial.lentQty) || 0;
+    const finalTotal = finalStock + finalLent;
+
     try {
+      // Fetch old values to calculate audit trail adjustment log
+      const oldMat = materials.find(m => m.id === editingMaterial.id);
+
       const { error: updErr } = await supabase
         .from('packaging_materials')
         .update({
           name: editingMaterial.name.trim(),
-          client_id: editingMaterial.clientId || null
+          client_id: editingMaterial.clientId || null,
+          stock_qty: finalStock,
+          lent_qty: finalLent,
+          total_qty: finalTotal
         })
         .eq('id', editingMaterial.id);
       if (updErr) throw updErr;
+
+      // Create log entry for manual adjustments
+      if (oldMat && (oldMat.stock_qty !== finalStock || oldMat.lent_qty !== finalLent)) {
+        const txId = `TX-PKG-${Math.floor(1000 + Math.random() * 9000)}`;
+        const notes = `Ajuste manual de inventario (Antes: Bodega=${oldMat.stock_qty}, Prestado=${oldMat.lent_qty} | Ahora: Bodega=${finalStock}, Prestado=${finalLent})`;
+        const qtyDiff = Math.abs(finalStock - oldMat.stock_qty) + Math.abs(finalLent - oldMat.lent_qty);
+        
+        await supabase.from('packaging_transactions').insert([{
+          id: txId,
+          material_id: editingMaterial.id,
+          type: 'ADJUSTMENT',
+          quantity: qtyDiff,
+          notes,
+          date: new Date().toISOString().split('T')[0]
+        }]);
+      }
 
       setShowEditMaterialModal(false);
       setEditingMaterial(null);
@@ -328,6 +356,7 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
       case 'LEND_TO_PRODUCER': return 'badge badge-orange';
       case 'RETURNED_IN_PURCHASE': return 'badge badge-blue';
       case 'SHIPPED_IN_SALE': return 'badge badge-purple';
+      case 'ADJUSTMENT': return 'badge badge-warning';
       default: return 'badge';
     }
   };
@@ -696,6 +725,31 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
                 <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '4px' }}>
                   Vincula la caja a un comprador si esta es proveída por él exclusivamente para sus lotes.
                 </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div className="form-group">
+                  <label className="form-label">En Bodega (Stock)</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={editingMaterial.stockQty}
+                    onChange={(e) => setEditingMaterial({ ...editingMaterial, stockQty: parseInt(e.target.value) || 0 })}
+                    min="0"
+                    required
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Prestado a Productores</label>
+                  <input
+                    type="number"
+                    className="form-input"
+                    value={editingMaterial.lentQty}
+                    onChange={(e) => setEditingMaterial({ ...editingMaterial, lentQty: parseInt(e.target.value) || 0 })}
+                    min="0"
+                    required
+                  />
+                </div>
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
