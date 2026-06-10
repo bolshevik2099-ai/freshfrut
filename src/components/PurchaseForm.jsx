@@ -9,7 +9,7 @@ const getLocalDateString = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-export default function PurchaseForm({ purchases, addPurchase, deletePurchase, editPurchase, suppliers }) {
+export default function PurchaseForm({ purchases, addPurchase, deletePurchase, editPurchase, suppliers, packagingMaterials = [] }) {
   const [berry, setBerry] = useState('Fresa');
   const [variety, setVariety] = useState('Albion');
   const [producer, setProducer] = useState('');
@@ -21,6 +21,11 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [isSuccess, setIsSuccess] = useState(false);
   const [lastRegisteredId, setLastRegisteredId] = useState('');
   const [isCredit, setIsCredit] = useState('NO');
+
+  // Consignment States
+  const [isConsigned, setIsConsigned] = useState(false);
+  const [consignedMaterialId, setConsignedMaterialId] = useState('');
+  const [consignedQuantity, setConsignedQuantity] = useState('');
 
   // Modal states
   const [activeModal, setActiveModal] = useState(null);
@@ -99,6 +104,9 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [editKg, setEditKg] = useState(0);
   const [editPricePerKg, setEditPricePerKg] = useState(0);
   const [editStorageLocation, setEditStorageLocation] = useState('BODEGA');
+  const [editIsConsigned, setEditIsConsigned] = useState(false);
+  const [editConsignedMaterialId, setEditConsignedMaterialId] = useState('');
+  const [editConsignedQuantity, setEditConsignedQuantity] = useState(0);
 
   const varietiesByBerry = {
     'Fresa': ['Albion', 'Camino Real', 'Festival'],
@@ -127,6 +135,11 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       return;
     }
 
+    if (isConsigned && (!consignedMaterialId || !consignedQuantity)) {
+      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+      return;
+    }
+
     const id = `LOT-${berry.substring(0, 3).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const totalCost = finalKg * finalPrice;
 
@@ -142,7 +155,10 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       date,
       qcStatus: 'PENDING',
       saleStatus: 'UNSOLD',
-      qcData: null
+      qcData: null,
+      isConsigned,
+      consignedMaterialId: isConsigned ? consignedMaterialId : null,
+      consignedQuantity: isConsigned ? parseInt(consignedQuantity) : null
     };
 
     addPurchase(newPurchase, isCredit === 'SI');
@@ -155,6 +171,9 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     setPricePerKg(45.00);
     setStorageLocation('BODEGA');
     setIsCredit('NO');
+    setIsConsigned(false);
+    setConsignedMaterialId('');
+    setConsignedQuantity('');
 
     setTimeout(() => {
       setIsSuccess(false);
@@ -172,6 +191,9 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     setEditKg(item.kg);
     setEditPricePerKg(item.pricePerKg);
     setEditStorageLocation(item.storageLocation);
+    setEditIsConsigned(item.isConsigned || false);
+    setEditConsignedMaterialId(item.consignedMaterialId || '');
+    setEditConsignedQuantity(item.consignedQuantity || 0);
     setActiveModal('edit');
   };
 
@@ -186,11 +208,19 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       return;
     }
 
+    if (editIsConsigned && (!editConsignedMaterialId || !editConsignedQuantity)) {
+      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+      return;
+    }
+
     const updatedLot = {
       producer: editProducer,
       kg: finalKg,
       pricePerKg: finalPrice,
-      storageLocation: editStorageLocation
+      storageLocation: editStorageLocation,
+      isConsigned: editIsConsigned,
+      consignedMaterialId: editIsConsigned ? editConsignedMaterialId : null,
+      consignedQuantity: editIsConsigned ? parseInt(editConsignedQuantity) : null
     };
 
     editPurchase(selectedItem.id, updatedLot);
@@ -510,6 +540,59 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                 </div>
               </div>
 
+              {/* Consignment Checkbox and Sub-fields */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--panel-border)', paddingTop: '12px', marginTop: '4px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <input
+                    type="checkbox"
+                    checked={isConsigned}
+                    onChange={(e) => setIsConsigned(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
+                  />
+                  ¿Material Consignado? (Cajas de Empaque)
+                </label>
+
+                {isConsigned && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px dashed var(--panel-border)',
+                    animation: 'fadeIn 0.2s ease-out'
+                  }} className="form-row-responsive">
+                    <div className="form-group">
+                      <label className="form-label">Seleccionar Caja Consignada</label>
+                      <select
+                        className="form-select"
+                        value={consignedMaterialId}
+                        onChange={(e) => setConsignedMaterialId(e.target.value)}
+                        required
+                      >
+                        <option value="">-- Elige un material --</option>
+                        {packagingMaterials.map(m => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Cantidad de Cajas</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="Ej: 300"
+                        value={consignedQuantity}
+                        onChange={(e) => setConsignedQuantity(e.target.value)}
+                        required
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               {/* Total Calculation Display */}
               <div style={{
                 background: 'rgba(0,0,0,0.2)',
@@ -562,6 +645,13 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                   {selectedItem.qcStatus === 'REJECTED' && <span className="badge badge-danger">Rechazado</span>}
                 </strong>
               </div>
+              {selectedItem.isConsigned && (
+                <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(59, 130, 246, 0.2)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                  <div style={{ fontWeight: 700, color: 'var(--color-blueberry)', marginBottom: '2px' }}>Material Consignado (Cajas):</div>
+                  <div>Tipo de Caja: <strong>{packagingMaterials.find(m => m.id === selectedItem.consignedMaterialId)?.name || 'Caja Consignada'}</strong></div>
+                  <div>Cantidad: <strong>{selectedItem.consignedQuantity} cajas</strong></div>
+                </div>
+              )}
               {selectedItem.qcData && (
                 <div style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', border: '1px solid var(--panel-border)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <div><span>Grados Brix:</span> <strong>{selectedItem.qcData.brix}°Bx</strong></div>
@@ -608,6 +698,58 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                   <option value="BODEGA">Nuestra Bodega (Planta)</option>
                   <option value="PROVEEDOR">Alojado por el Proveedor (Rancho)</option>
                 </select>
+              </div>
+
+              {/* Consignment Checkbox and Sub-fields */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid var(--panel-border)', paddingTop: '12px', marginTop: '4px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  <input
+                    type="checkbox"
+                    checked={editIsConsigned}
+                    onChange={(e) => setEditIsConsigned(e.target.checked)}
+                    style={{ width: '16px', height: '16px', accentColor: 'var(--color-success)' }}
+                  />
+                  ¿Material Consignado? (Cajas de Empaque)
+                </label>
+
+                {editIsConsigned && (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '12px',
+                    background: 'rgba(255,255,255,0.03)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px dashed var(--panel-border)'
+                  }} className="form-row-responsive">
+                    <div className="form-group">
+                      <label className="form-label">Seleccionar Caja Consignada</label>
+                      <select
+                        className="form-select"
+                        value={editConsignedMaterialId}
+                        onChange={(e) => setEditConsignedMaterialId(e.target.value)}
+                        required
+                      >
+                        <option value="">-- Elige un material --</option>
+                        {packagingMaterials.map(m => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Cantidad de Cajas</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="Ej: 300"
+                        value={editConsignedQuantity}
+                        onChange={(e) => setEditConsignedQuantity(e.target.value)}
+                        required
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>

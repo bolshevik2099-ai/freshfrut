@@ -1,10 +1,11 @@
 import React from 'react';
-import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Users, DollarSign, Wallet, LogOut, MessageSquare, Sliders, X } from 'lucide-react';
+import { LayoutDashboard, QrCode, ClipboardCheck, Globe, Database, ShoppingBag, Truck, PackageOpen, Box, Users, DollarSign, Wallet, LogOut, MessageSquare, Sliders, X } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 'admin', onClose, isMobileOpen = false }) {
   const menuItems = [
     { id: 'dashboard', label: 'Panel de Control', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventario', icon: PackageOpen },
+    { id: 'packaging', label: 'Control de Cajas', icon: Box },
     { id: 'purchases', label: 'Compras (Recepción)', icon: ShoppingBag },
     { id: 'quality', label: 'Control de Calidad', icon: ClipboardCheck },
     { id: 'sales', label: 'Ventas (Despachos)', icon: Truck },

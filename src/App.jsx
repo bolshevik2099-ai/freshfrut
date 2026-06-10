@@ -16,6 +16,7 @@ import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import AIChat from './components/AIChat';
 import ChatConfig from './components/ChatConfig';
+import PackagingManager from './components/PackagingManager';
 
 
 
@@ -39,6 +40,7 @@ function App() {
   const [clients, setClients] = useState([]);
   const [debts, setDebts] = useState([]);
   const [expenses, setExpenses] = useState([]);
+  const [packagingMaterials, setPackagingMaterials] = useState([]);
   const [lastOperatorActivity, setLastOperatorActivity] = useState(null);
 
   const fetchLastOperatorActivity = async () => {
@@ -85,6 +87,15 @@ function App() {
     setCurrentView('landing');
   };
 
+  const fetchPackagingMaterials = async () => {
+    try {
+      const { data: pkgs } = await supabase.from('packaging_materials').select('*');
+      if (pkgs) setPackagingMaterials(pkgs);
+    } catch (err) {
+      console.error("Error refreshing packaging materials:", err);
+    }
+  };
+
   // Load initial data from Supabase
   useEffect(() => {
     async function loadData() {
@@ -106,6 +117,9 @@ function App() {
 
         const { data: exps } = await supabase.from('expenses').select('*');
         if (exps) setExpenses(exps);
+
+        const { data: pkgs } = await supabase.from('packaging_materials').select('*');
+        if (pkgs) setPackagingMaterials(pkgs);
 
         // Track user activity and fetch operator activity for admin
         const sessionActive = localStorage.getItem('freshfrut_session') === 'active';
@@ -134,6 +148,39 @@ function App() {
 
     const { error } = await supabase.from('purchases').insert([purchaseWithRemaining]);
     if (error) console.error("Error inserting purchase:", error);
+
+    // Consigned packaging logic
+    if (newPurchase.isConsigned) {
+      const supplier = suppliers.find(s => s.name === newPurchase.producer);
+      const producerId = supplier ? supplier.id : null;
+      const txId = `TX-PKG-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payload = {
+        id: txId,
+        material_id: newPurchase.consignedMaterialId,
+        type: 'RETURNED_IN_PURCHASE',
+        quantity: newPurchase.consignedQuantity,
+        producer_id: producerId,
+        reference_id: newPurchase.id,
+        date: newPurchase.date,
+        notes: `Entrada por recepción de fruta fresca en lote ${newPurchase.id}`
+      };
+      await supabase.from('packaging_transactions').insert([payload]);
+
+      const mat = packagingMaterials.find(m => m.id === newPurchase.consignedMaterialId);
+      if (mat) {
+        const newStock = mat.stock_qty + newPurchase.consignedQuantity;
+        const newLent = Math.max(0, mat.lent_qty - newPurchase.consignedQuantity);
+        await supabase
+          .from('packaging_materials')
+          .update({
+            stock_qty: newStock,
+            lent_qty: newLent,
+            total_qty: newStock + newLent
+          })
+          .eq('id', mat.id);
+      }
+      fetchPackagingMaterials();
+    }
 
     if (isCredit) {
       const debtId = `DEB-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -185,6 +232,49 @@ function App() {
 
     setPurchases(prev => prev.map(p => p.id === id ? finalLot : p));
 
+    // Revert old packaging transaction if it existed
+    if (lot.isConsigned) {
+      const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', id);
+      if (txs && txs.length > 0) {
+        const tx = txs[0];
+        const mat = packagingMaterials.find(m => m.id === tx.material_id);
+        if (mat) {
+          const newStock = Math.max(0, mat.stock_qty - tx.quantity);
+          const newLent = mat.lent_qty + tx.quantity;
+          await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
+        }
+        await supabase.from('packaging_transactions').delete().eq('reference_id', id);
+      }
+    }
+
+    // Apply new packaging transaction if updated is consigned
+    if (updatedLot.isConsigned) {
+      const supplier = suppliers.find(s => s.name === updatedLot.producer);
+      const producerId = supplier ? supplier.id : null;
+      const txId = `TX-PKG-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payload = {
+        id: txId,
+        material_id: updatedLot.consignedMaterialId,
+        type: 'RETURNED_IN_PURCHASE',
+        quantity: updatedLot.consignedQuantity,
+        producer_id: producerId,
+        reference_id: id,
+        date: updatedLot.date,
+        notes: `Entrada por recepción de fruta fresca en lote ${id} (Editado)`
+      };
+      await supabase.from('packaging_transactions').insert([payload]);
+
+      // Fetch fresh material status to ensure accuracy
+      const { data: freshMats } = await supabase.from('packaging_materials').select('*').eq('id', updatedLot.consignedMaterialId);
+      if (freshMats && freshMats.length > 0) {
+        const mat = freshMats[0];
+        const newStock = mat.stock_qty + updatedLot.consignedQuantity;
+        const newLent = Math.max(0, mat.lent_qty - updatedLot.consignedQuantity);
+        await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
+      }
+    }
+    fetchPackagingMaterials();
+
     const { error } = await supabase
       .from('purchases')
       .update({
@@ -199,7 +289,10 @@ function App() {
         date: finalLot.date,
         qcStatus: finalLot.qcStatus,
         saleStatus: finalLot.saleStatus,
-        qcData: finalLot.qcData
+        qcData: finalLot.qcData,
+        isConsigned: finalLot.isConsigned,
+        consignedMaterialId: finalLot.consignedMaterialId,
+        consignedQuantity: finalLot.consignedQuantity
       })
       .eq('id', id);
     if (error) console.error("Error updating purchase:", error);
@@ -239,10 +332,29 @@ function App() {
   };
 
   const deletePurchase = async (id) => {
+    const lot = purchases.find(p => p.id === id);
+    if (!lot) return;
+
     if (confirm(`¿Estás seguro de eliminar el Lote ${id}? Esto también eliminará las ventas y deudas asociadas.`)) {
       setPurchases(prev => prev.filter(p => p.id !== id));
       setSales(prev => prev.filter(s => s.purchaseId !== id));
       setDebts(prev => prev.filter(d => d.sourceId !== id));
+
+      if (lot.isConsigned) {
+        // Find associated packaging transaction
+        const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', id);
+        if (txs && txs.length > 0) {
+          const tx = txs[0];
+          const mat = packagingMaterials.find(m => m.id === tx.material_id);
+          if (mat) {
+            const newStock = Math.max(0, mat.stock_qty - tx.quantity);
+            const newLent = mat.lent_qty + tx.quantity;
+            await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
+          }
+          await supabase.from('packaging_transactions').delete().eq('reference_id', id);
+        }
+        fetchPackagingMaterials();
+      }
 
       const { error: dErr } = await supabase.from('debts').delete().eq('sourceId', id);
       if (dErr) console.error("Error deleting linked debts:", dErr);
@@ -258,6 +370,37 @@ function App() {
 
     const { error } = await supabase.from('sales').insert([newSale]);
     if (error) console.error("Error inserting sale:", error);
+
+    // Consigned packaging logic
+    if (newSale.isConsigned) {
+      const clientObj = clients.find(c => c.name === newSale.client);
+      const clientId = clientObj ? clientObj.id : null;
+      const txId = `TX-PKG-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payload = {
+        id: txId,
+        material_id: newSale.consignedMaterialId,
+        type: 'SHIPPED_IN_SALE',
+        quantity: newSale.consignedQuantity,
+        client_id: clientId,
+        reference_id: newSale.id,
+        date: newSale.date,
+        notes: `Salida por despacho de fruta en venta ${newSale.id}`
+      };
+      await supabase.from('packaging_transactions').insert([payload]);
+
+      const mat = packagingMaterials.find(m => m.id === newSale.consignedMaterialId);
+      if (mat) {
+        const newStock = Math.max(0, mat.stock_qty - newSale.consignedQuantity);
+        await supabase
+          .from('packaging_materials')
+          .update({
+            stock_qty: newStock,
+            total_qty: newStock + mat.lent_qty
+          })
+          .eq('id', mat.id);
+      }
+      fetchPackagingMaterials();
+    }
 
     if (isCredit) {
       const debtId = `DEB-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -318,6 +461,20 @@ function App() {
         if (pErr) console.error("Error updating purchase remaining kg after sale deletion:", pErr);
       }
 
+      if (saleToDelete.isConsigned) {
+        const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', saleId);
+        if (txs && txs.length > 0) {
+          const tx = txs[0];
+          const mat = packagingMaterials.find(m => m.id === tx.material_id);
+          if (mat) {
+            const newStock = mat.stock_qty + tx.quantity;
+            await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
+          }
+          await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
+        }
+        fetchPackagingMaterials();
+      }
+
       setSales(prev => prev.filter(s => s.id !== saleId));
       setDebts(prev => prev.filter(d => d.sourceId !== saleId));
 
@@ -354,6 +511,47 @@ function App() {
       .update({ remainingKg: remaining, saleStatus })
       .eq('id', lot.id);
     if (pErr) console.error("Error updating purchase remaining kg after sale edit:", pErr);
+
+    // Revert old packaging transaction if it existed
+    if (oldSale.isConsigned) {
+      const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', saleId);
+      if (txs && txs.length > 0) {
+        const tx = txs[0];
+        const mat = packagingMaterials.find(m => m.id === tx.material_id);
+        if (mat) {
+          const newStock = mat.stock_qty + tx.quantity;
+          await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
+        }
+        await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
+      }
+    }
+
+    // Apply new packaging transaction if updated is consigned
+    if (updatedSale.isConsigned) {
+      const clientObj = clients.find(c => c.name === updatedSale.client);
+      const clientId = clientObj ? clientObj.id : null;
+      const txId = `TX-PKG-${Math.floor(1000 + Math.random() * 9000)}`;
+      const payload = {
+        id: txId,
+        material_id: updatedSale.consignedMaterialId,
+        type: 'SHIPPED_IN_SALE',
+        quantity: updatedSale.consignedQuantity,
+        client_id: clientId,
+        reference_id: saleId,
+        date: updatedSale.date,
+        notes: `Salida por despacho de fruta en venta ${saleId} (Editado)`
+      };
+      await supabase.from('packaging_transactions').insert([payload]);
+
+      // Fetch fresh material status to ensure accuracy
+      const { data: freshMats } = await supabase.from('packaging_materials').select('*').eq('id', updatedSale.consignedMaterialId);
+      if (freshMats && freshMats.length > 0) {
+        const mat = freshMats[0];
+        const newStock = Math.max(0, mat.stock_qty - updatedSale.consignedQuantity);
+        await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
+      }
+    }
+    fetchPackagingMaterials();
 
     // Update sale and associated debt
     const newRevenue = updatedSale.kg * updatedSale.priceSoldPerKg;
@@ -400,7 +598,10 @@ function App() {
             profit: finalSale.profit,
             shippingLine: finalSale.shippingLine,
             containerId: finalSale.containerId,
-            status: finalSale.status
+            status: finalSale.status,
+            isConsigned: finalSale.isConsigned,
+            consignedMaterialId: finalSale.consignedMaterialId,
+            consignedQuantity: finalSale.consignedQuantity
           })
           .eq('id', saleId)
           .then(({ error: sErr }) => {
@@ -623,6 +824,13 @@ function App() {
           />
         )}
         
+        {activeTab === 'packaging' && (
+          <PackagingManager 
+            suppliers={suppliers} 
+            clients={clients} 
+          />
+        )}
+        
         {activeTab === 'purchases' && (
           <PurchaseForm 
             purchases={purchases} 
@@ -630,6 +838,7 @@ function App() {
             deletePurchase={deletePurchase} 
             editPurchase={editPurchase} 
             suppliers={suppliers}
+            packagingMaterials={packagingMaterials}
           />
         )}
         
@@ -646,6 +855,7 @@ function App() {
             deleteSale={deleteSale} 
             editSale={editSale} 
             clients={clients}
+            packagingMaterials={packagingMaterials}
           />
         )}
         
