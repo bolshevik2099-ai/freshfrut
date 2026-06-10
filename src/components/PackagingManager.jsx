@@ -16,7 +16,8 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
   const [editingMaterial, setEditingMaterial] = useState(null); // { id: '', name: '', clientId: '' }
 
   const [showTxModal, setShowTxModal] = useState(false);
-  const [txType, setTxType] = useState('RECEIVE_FROM_BUYER'); // 'RECEIVE_FROM_BUYER' or 'LEND_TO_PRODUCER'
+  const [modalContext, setModalContext] = useState('client'); // 'client' or 'producer'
+  const [txType, setTxType] = useState('RECEIVE_FROM_BUYER'); // 'RECEIVE_FROM_BUYER', 'SHIPPED_IN_SALE', 'LEND_TO_PRODUCER', 'RETURNED_IN_PURCHASE'
   const [newTx, setNewTx] = useState({
     materialId: '',
     quantity: '',
@@ -172,8 +173,9 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
       return;
     }
 
-    // Validation for lending: check if we have enough stock in warehouse
     const material = materials.find(m => m.id === newTx.materialId);
+
+    // Validation based on txType
     if (txType === 'LEND_TO_PRODUCER') {
       if (!newTx.producerId) {
         alert("Debes seleccionar un productor para realizar el préstamo.");
@@ -183,10 +185,23 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
         alert(`Stock insuficiente en bodega. Solo hay ${material.stock_qty} cajas disponibles.`);
         return;
       }
-    } else {
-      // RECEIVE_FROM_BUYER
+    } else if (txType === 'RETURNED_IN_PURCHASE') {
+      if (!newTx.producerId) {
+        alert("Debes seleccionar un productor que devuelve las cajas.");
+        return;
+      }
+    } else if (txType === 'RECEIVE_FROM_BUYER') {
       if (!newTx.clientId) {
         alert("Debes seleccionar el cliente/comprador de origen.");
+        return;
+      }
+    } else if (txType === 'SHIPPED_IN_SALE') {
+      if (!newTx.clientId) {
+        alert("Debes seleccionar el cliente/comprador de destino.");
+        return;
+      }
+      if (material.stock_qty < qty) {
+        alert(`Stock insuficiente en bodega. Solo hay ${material.stock_qty} cajas disponibles.`);
         return;
       }
     }
@@ -198,8 +213,8 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
         material_id: newTx.materialId,
         type: txType,
         quantity: qty,
-        producer_id: txType === 'LEND_TO_PRODUCER' ? newTx.producerId : null,
-        client_id: txType === 'RECEIVE_FROM_BUYER' ? newTx.clientId : null,
+        producer_id: (txType === 'LEND_TO_PRODUCER' || txType === 'RETURNED_IN_PURCHASE') ? newTx.producerId : null,
+        client_id: (txType === 'RECEIVE_FROM_BUYER' || txType === 'SHIPPED_IN_SALE') ? newTx.clientId : null,
         date: newTx.date,
         notes: newTx.notes.trim() || null
       };
@@ -214,9 +229,14 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
 
       if (txType === 'RECEIVE_FROM_BUYER') {
         newStock += qty;
+      } else if (txType === 'SHIPPED_IN_SALE') {
+        newStock -= qty;
       } else if (txType === 'LEND_TO_PRODUCER') {
         newStock -= qty;
         newLent += qty;
+      } else if (txType === 'RETURNED_IN_PURCHASE') {
+        newStock += qty;
+        newLent = Math.max(0, newLent - qty);
       }
 
       const { error: matErr } = await supabase
@@ -439,18 +459,18 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
             <Plus size={16} /> Crear Tipo de Caja
           </button>
           <button 
-            onClick={() => { setTxType('RECEIVE_FROM_BUYER'); setShowTxModal(true); }} 
+            onClick={() => { setModalContext('client'); setTxType('RECEIVE_FROM_BUYER'); setShowTxModal(true); }} 
             className="btn-primary" 
             style={{ background: 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)', color: 'white' }}
           >
-            <ArrowDownCircle size={16} /> Recibir de Comprador
+            <ArrowDownCircle size={16} /> Comprador (Recibir/Entregar)
           </button>
           <button 
-            onClick={() => { setTxType('LEND_TO_PRODUCER'); setShowTxModal(true); }} 
+            onClick={() => { setModalContext('producer'); setTxType('LEND_TO_PRODUCER'); setShowTxModal(true); }} 
             className="btn-primary" 
             style={{ background: 'linear-gradient(135deg, var(--color-blackberry) 0%, var(--color-blackberry) 100%)', color: 'white' }}
           >
-            <Send size={16} /> Prestar a Productor
+            <Send size={16} /> Productor (Prestar/Recibir)
           </button>
         </div>
       </div>
@@ -857,13 +877,42 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
           <div className="glass-panel modal-content" style={modalContentStyle}>
             <div style={modalHeaderStyle}>
               <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {txType === 'RECEIVE_FROM_BUYER' ? <ArrowDownCircle size={20} color="var(--color-success)" /> : <Send size={20} color="var(--color-blackberry)" />}
-                {txType === 'RECEIVE_FROM_BUYER' ? 'Recibir Cajas de Comprador' : 'Prestar Cajas a Productor'}
+                {(txType === 'RECEIVE_FROM_BUYER' || txType === 'RETURNED_IN_PURCHASE') ? (
+                  <ArrowDownCircle size={20} color="var(--color-success)" />
+                ) : (
+                  <Send size={20} color="var(--color-blackberry)" />
+                )}
+                {modalContext === 'client' ? 'Movimiento de Comprador (Cajas)' : 'Movimiento de Productor (Cajas)'}
               </h3>
               <button onClick={() => setShowTxModal(false)} className="btn-secondary" style={{ padding: '6px' }}><Plus size={16} style={{ transform: 'rotate(45deg)' }} /></button>
             </div>
             
             <form onSubmit={handleAddTransaction} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="form-group">
+                <label className="form-label">Tipo de Movimiento</label>
+                {modalContext === 'client' ? (
+                  <select
+                    className="form-select"
+                    value={txType}
+                    onChange={(e) => setTxType(e.target.value)}
+                    required
+                  >
+                    <option value="RECEIVE_FROM_BUYER">Recibir cajas del comprador (Aumenta stock en bodega)</option>
+                    <option value="SHIPPED_IN_SALE">Entregar/Despachar cajas al comprador (Disminuye stock en bodega)</option>
+                  </select>
+                ) : (
+                  <select
+                    className="form-select"
+                    value={txType}
+                    onChange={(e) => setTxType(e.target.value)}
+                    required
+                  >
+                    <option value="LEND_TO_PRODUCER">Prestar cajas al productor (Disminuye stock, aumenta prestado)</option>
+                    <option value="RETURNED_IN_PURCHASE">Recibir cajas devueltas por el productor (Aumenta stock, disminuye prestado)</option>
+                  </select>
+                )}
+              </div>
+
               <div className="form-group">
                 <label className="form-label">Seleccionar Tipo de Caja</label>
                 <select
@@ -875,22 +924,22 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
                   <option value="">-- Elige un material de empaque --</option>
                   {materials.map(m => (
                     <option key={m.id} value={m.id}>
-                      {m.name} {txType === 'LEND_TO_PRODUCER' ? `(Disp: ${m.stock_qty})` : ''}
+                      {m.name} (Bodega: {m.stock_qty} | Prestado: {m.lent_qty})
                     </option>
                   ))}
                 </select>
               </div>
 
-              {txType === 'RECEIVE_FROM_BUYER' ? (
+              {modalContext === 'client' ? (
                 <div className="form-group">
-                  <label className="form-label">Cliente / Comprador de Origen</label>
+                  <label className="form-label">Cliente / Comprador</label>
                   <select
                     className="form-select"
                     value={newTx.clientId}
                     onChange={(e) => setNewTx({ ...newTx, clientId: e.target.value })}
                     required
                   >
-                    <option value="">-- Selecciona el cliente que nos envía las cajas --</option>
+                    <option value="">-- Selecciona el cliente --</option>
                     {clients.map(c => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -898,14 +947,14 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
                 </div>
               ) : (
                 <div className="form-group">
-                  <label className="form-label">Productor / Proveedor Destino</label>
+                  <label className="form-label">Productor / Proveedor</label>
                   <select
                     className="form-select"
                     value={newTx.producerId}
                     onChange={(e) => setNewTx({ ...newTx, producerId: e.target.value })}
                     required
                   >
-                    <option value="">-- Selecciona el productor a quien prestamos las cajas --</option>
+                    <option value="">-- Selecciona el productor --</option>
                     {suppliers.map(s => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
@@ -952,8 +1001,16 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowTxModal(false)} className="btn-secondary">Cancelar</button>
-                <button type="submit" className="btn-primary" style={{ background: txType === 'RECEIVE_FROM_BUYER' ? 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)' : 'linear-gradient(135deg, var(--color-blackberry) 0%, #4f46e5 100%)' }}>
-                  {txType === 'RECEIVE_FROM_BUYER' ? 'Registrar Entrada' : 'Registrar Préstamo'}
+                <button 
+                  type="submit" 
+                  className="btn-primary" 
+                  style={{ 
+                    background: (txType === 'RECEIVE_FROM_BUYER' || txType === 'RETURNED_IN_PURCHASE') 
+                      ? 'linear-gradient(135deg, var(--color-success) 0%, #059669 100%)' 
+                      : 'linear-gradient(135deg, var(--color-blackberry) 0%, var(--color-blackberry) 100%)' 
+                  }}
+                >
+                  {(txType === 'RECEIVE_FROM_BUYER' || txType === 'RETURNED_IN_PURCHASE') ? 'Registrar Entrada' : 'Registrar Salida / Préstamo'}
                 </button>
               </div>
             </form>
