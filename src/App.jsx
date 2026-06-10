@@ -367,28 +367,46 @@ function App() {
       setSales(prev => prev.filter(s => s.purchaseId !== id));
       setDebts(prev => prev.filter(d => d.sourceId !== id));
 
-      if (lot.isConsigned) {
-        // Find associated packaging transaction
-        const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', id);
-        if (txs && txs.length > 0) {
-          const tx = txs[0];
+      // Find and revert associated packaging transaction for the purchase
+      const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', id);
+      if (txs && txs.length > 0) {
+        const tx = txs[0];
+        const mat = packagingMaterials.find(m => m.id === tx.material_id);
+        if (mat) {
+          let newStock = mat.stock_qty;
+          let newLent = mat.lent_qty;
+          if (tx.type === 'RETURNED_IN_PURCHASE') {
+            newStock = Math.max(0, mat.stock_qty - tx.quantity);
+            newLent = mat.lent_qty + tx.quantity;
+          } else if (tx.type === 'LEND_TO_PRODUCER') {
+            newStock = mat.stock_qty + tx.quantity;
+            newLent = Math.max(0, mat.lent_qty - tx.quantity);
+          }
+          await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
+        }
+        await supabase.from('packaging_transactions').delete().eq('reference_id', id);
+      }
+
+      // Also revert and delete packaging transactions for any sales linked to this purchase
+      const associatedSales = sales.filter(s => s.purchaseId === id);
+      for (const sale of associatedSales) {
+        const { data: saleTxs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', sale.id);
+        if (saleTxs && saleTxs.length > 0) {
+          const tx = saleTxs[0];
           const mat = packagingMaterials.find(m => m.id === tx.material_id);
           if (mat) {
             let newStock = mat.stock_qty;
-            let newLent = mat.lent_qty;
-            if (tx.type === 'RETURNED_IN_PURCHASE') {
-              newStock = Math.max(0, mat.stock_qty - tx.quantity);
-              newLent = mat.lent_qty + tx.quantity;
-            } else if (tx.type === 'LEND_TO_PRODUCER') {
+            if (tx.type === 'SHIPPED_IN_SALE') {
               newStock = mat.stock_qty + tx.quantity;
-              newLent = Math.max(0, mat.lent_qty - tx.quantity);
+            } else if (tx.type === 'RECEIVE_FROM_BUYER') {
+              newStock = Math.max(0, mat.stock_qty - tx.quantity);
             }
-            await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
+            await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
           }
-          await supabase.from('packaging_transactions').delete().eq('reference_id', id);
+          await supabase.from('packaging_transactions').delete().eq('reference_id', sale.id);
         }
-        fetchPackagingMaterials();
       }
+      fetchPackagingMaterials();
 
       const { error: dErr } = await supabase.from('debts').delete().eq('sourceId', id);
       if (dErr) console.error("Error deleting linked debts:", dErr);
@@ -502,24 +520,23 @@ function App() {
         if (pErr) console.error("Error updating purchase remaining kg after sale deletion:", pErr);
       }
 
-      if (saleToDelete.isConsigned) {
-        const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', saleId);
-        if (txs && txs.length > 0) {
-          const tx = txs[0];
-          const mat = packagingMaterials.find(m => m.id === tx.material_id);
-          if (mat) {
-            let newStock = mat.stock_qty;
-            if (tx.type === 'SHIPPED_IN_SALE') {
-              newStock = mat.stock_qty + tx.quantity;
-            } else if (tx.type === 'RECEIVE_FROM_BUYER') {
-              newStock = Math.max(0, mat.stock_qty - tx.quantity);
-            }
-            await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
+      // Always find and revert any associated packaging transaction
+      const { data: txs } = await supabase.from('packaging_transactions').select('*').eq('reference_id', saleId);
+      if (txs && txs.length > 0) {
+        const tx = txs[0];
+        const mat = packagingMaterials.find(m => m.id === tx.material_id);
+        if (mat) {
+          let newStock = mat.stock_qty;
+          if (tx.type === 'SHIPPED_IN_SALE') {
+            newStock = mat.stock_qty + tx.quantity;
+          } else if (tx.type === 'RECEIVE_FROM_BUYER') {
+            newStock = Math.max(0, mat.stock_qty - tx.quantity);
           }
-          await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
+          await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
         }
-        fetchPackagingMaterials();
+        await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
       }
+      fetchPackagingMaterials();
 
       setSales(prev => prev.filter(s => s.id !== saleId));
       setDebts(prev => prev.filter(d => d.sourceId !== saleId));
