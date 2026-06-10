@@ -344,7 +344,49 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
       }
     });
 
-    // Filter out suppliers with no movements at all
+    return Object.entries(balances)
+      .map(([id, val]) => ({ id, ...val }))
+      .filter(b => Object.keys(b.materials).length > 0);
+  };
+
+  // Helper to calculate buyer box balance (how many we owe them)
+  const getClientsBalances = () => {
+    const balances = {};
+    
+    // Initialize for all clients
+    clients.forEach(c => {
+      balances[c.id] = {
+        clientName: c.name,
+        materials: {} // materialId: { received: 0, shipped: 0, balance: 0 }
+      };
+    });
+
+    // Populate balances based on transactions
+    transactions.forEach(tx => {
+      if (tx.client_id && balances[tx.client_id]) {
+        const matId = tx.material_id;
+        const matName = materials.find(m => m.id === matId)?.name || 'Caja Desconocida';
+
+        if (!balances[tx.client_id].materials[matId]) {
+          balances[tx.client_id].materials[matId] = {
+            name: matName,
+            received: 0,
+            shipped: 0,
+            balance: 0
+          };
+        }
+
+        if (tx.type === 'RECEIVE_FROM_BUYER') {
+          balances[tx.client_id].materials[matId].received += tx.quantity;
+          balances[tx.client_id].materials[matId].balance += tx.quantity;
+        } else if (tx.type === 'SHIPPED_IN_SALE') {
+          balances[tx.client_id].materials[matId].shipped += tx.quantity;
+          balances[tx.client_id].materials[matId].balance -= tx.quantity;
+        }
+      }
+    });
+
+    // Filter out clients with no movements at all
     return Object.entries(balances)
       .map(([id, val]) => ({ id, ...val }))
       .filter(b => Object.keys(b.materials).length > 0);
@@ -373,6 +415,7 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
   };
 
   const suppliersBalances = getSuppliersBalances();
+  const clientsBalances = getClientsBalances();
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -423,6 +466,7 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
         {[
           { id: 'inventory', label: 'Inventario de Cajas' },
           { id: 'suppliers_balance', label: 'Saldos de Productores' },
+          { id: 'clients_balance', label: 'Saldos de Clientes' },
           { id: 'history', label: 'Historial de Movimientos' }
         ].map(tab => (
           <button
@@ -565,6 +609,50 @@ export default function PackagingManager({ suppliers = [], clients = [], onRefre
               </div>
             )}
 
+            {/* SUBTAB: CLIENTS BALANCE */}
+            {activeSubTab === 'clients_balance' && (
+              <div className="table-container">
+                <table className="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Cliente / Comprador</th>
+                      <th>Tipo de Caja Consignada</th>
+                      <th style={{ textAlign: 'right' }}>Recibidas (Vacías)</th>
+                      <th style={{ textAlign: 'right' }}>Entregadas (Venta)</th>
+                      <th style={{ textAlign: 'right' }}>Saldo Pendiente (Le Debemos)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clientsBalances.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: 'center', padding: '40px 10px', color: 'var(--text-muted)' }}>
+                          No hay deudas de cajas activas con ningún cliente.
+                        </td>
+                      </tr>
+                    ) : (
+                      clientsBalances.map(cliBal => (
+                        Object.entries(cliBal.materials).map(([matId, mat], idx) => (
+                          <tr key={`${cliBal.id}-${matId}`}>
+                            {idx === 0 && (
+                              <td rowSpan={Object.keys(cliBal.materials).length} style={{ fontWeight: 600, verticalAlign: 'middle' }}>
+                                {cliBal.clientName}
+                              </td>
+                            )}
+                            <td>{mat.name}</td>
+                            <td style={{ textAlign: 'right' }}>{mat.received.toLocaleString()}</td>
+                            <td style={{ textAlign: 'right' }}>{mat.shipped.toLocaleString()}</td>
+                            <td style={{ textAlign: 'right', fontWeight: 700, color: mat.balance > 0 ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                              {mat.balance.toLocaleString()} {mat.balance > 0 && <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>(Debemos)</span>}
+                            </td>
+                          </tr>
+                        ))
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
             {/* SUBTAB: HISTORY */}
             {activeSubTab === 'history' && (
               <div className="table-container">
