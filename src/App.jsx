@@ -157,19 +157,29 @@ function App() {
       const payload = {
         id: txId,
         material_id: newPurchase.consignedMaterialId,
-        type: 'RETURNED_IN_PURCHASE',
+        type: newPurchase.consignedType || 'RETURNED_IN_PURCHASE',
         quantity: newPurchase.consignedQuantity,
         producer_id: producerId,
         reference_id: newPurchase.id,
         date: newPurchase.date,
-        notes: `Entrada por recepción de fruta fresca en lote ${newPurchase.id}`
+        notes: newPurchase.consignedType === 'LEND_TO_PRODUCER'
+          ? `Salida por préstamo de cajas en recepción ${newPurchase.id}`
+          : `Entrada por recepción de fruta fresca en lote ${newPurchase.id}`
       };
       await supabase.from('packaging_transactions').insert([payload]);
 
       const mat = packagingMaterials.find(m => m.id === newPurchase.consignedMaterialId);
       if (mat) {
-        const newStock = mat.stock_qty + newPurchase.consignedQuantity;
-        const newLent = Math.max(0, mat.lent_qty - newPurchase.consignedQuantity);
+        let newStock = mat.stock_qty;
+        let newLent = mat.lent_qty;
+        if (payload.type === 'RETURNED_IN_PURCHASE') {
+          newStock = mat.stock_qty + newPurchase.consignedQuantity;
+          newLent = Math.max(0, mat.lent_qty - newPurchase.consignedQuantity);
+        } else if (payload.type === 'LEND_TO_PRODUCER') {
+          newStock = Math.max(0, mat.stock_qty - newPurchase.consignedQuantity);
+          newLent = mat.lent_qty + newPurchase.consignedQuantity;
+        }
+
         await supabase
           .from('packaging_materials')
           .update({
@@ -239,8 +249,15 @@ function App() {
         const tx = txs[0];
         const mat = packagingMaterials.find(m => m.id === tx.material_id);
         if (mat) {
-          const newStock = Math.max(0, mat.stock_qty - tx.quantity);
-          const newLent = mat.lent_qty + tx.quantity;
+          let newStock = mat.stock_qty;
+          let newLent = mat.lent_qty;
+          if (tx.type === 'RETURNED_IN_PURCHASE') {
+            newStock = Math.max(0, mat.stock_qty - tx.quantity);
+            newLent = mat.lent_qty + tx.quantity;
+          } else if (tx.type === 'LEND_TO_PRODUCER') {
+            newStock = mat.stock_qty + tx.quantity;
+            newLent = Math.max(0, mat.lent_qty - tx.quantity);
+          }
           await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
         }
         await supabase.from('packaging_transactions').delete().eq('reference_id', id);
@@ -255,12 +272,14 @@ function App() {
       const payload = {
         id: txId,
         material_id: updatedLot.consignedMaterialId,
-        type: 'RETURNED_IN_PURCHASE',
+        type: updatedLot.consignedType || 'RETURNED_IN_PURCHASE',
         quantity: updatedLot.consignedQuantity,
         producer_id: producerId,
         reference_id: id,
         date: updatedLot.date,
-        notes: `Entrada por recepción de fruta fresca en lote ${id} (Editado)`
+        notes: updatedLot.consignedType === 'LEND_TO_PRODUCER'
+          ? `Salida por préstamo de cajas en recepción ${id} (Editado)`
+          : `Entrada por recepción de fruta fresca en lote ${id} (Editado)`
       };
       await supabase.from('packaging_transactions').insert([payload]);
 
@@ -268,8 +287,15 @@ function App() {
       const { data: freshMats } = await supabase.from('packaging_materials').select('*').eq('id', updatedLot.consignedMaterialId);
       if (freshMats && freshMats.length > 0) {
         const mat = freshMats[0];
-        const newStock = mat.stock_qty + updatedLot.consignedQuantity;
-        const newLent = Math.max(0, mat.lent_qty - updatedLot.consignedQuantity);
+        let newStock = mat.stock_qty;
+        let newLent = mat.lent_qty;
+        if (payload.type === 'RETURNED_IN_PURCHASE') {
+          newStock = mat.stock_qty + updatedLot.consignedQuantity;
+          newLent = Math.max(0, mat.lent_qty - updatedLot.consignedQuantity);
+        } else if (payload.type === 'LEND_TO_PRODUCER') {
+          newStock = Math.max(0, mat.stock_qty - updatedLot.consignedQuantity);
+          newLent = mat.lent_qty + updatedLot.consignedQuantity;
+        }
         await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
       }
     }
@@ -292,7 +318,8 @@ function App() {
         qcData: finalLot.qcData,
         isConsigned: finalLot.isConsigned,
         consignedMaterialId: finalLot.consignedMaterialId,
-        consignedQuantity: finalLot.consignedQuantity
+        consignedQuantity: finalLot.consignedQuantity,
+        consignedType: finalLot.consignedType
       })
       .eq('id', id);
     if (error) console.error("Error updating purchase:", error);
@@ -347,8 +374,15 @@ function App() {
           const tx = txs[0];
           const mat = packagingMaterials.find(m => m.id === tx.material_id);
           if (mat) {
-            const newStock = Math.max(0, mat.stock_qty - tx.quantity);
-            const newLent = mat.lent_qty + tx.quantity;
+            let newStock = mat.stock_qty;
+            let newLent = mat.lent_qty;
+            if (tx.type === 'RETURNED_IN_PURCHASE') {
+              newStock = Math.max(0, mat.stock_qty - tx.quantity);
+              newLent = mat.lent_qty + tx.quantity;
+            } else if (tx.type === 'LEND_TO_PRODUCER') {
+              newStock = mat.stock_qty + tx.quantity;
+              newLent = Math.max(0, mat.lent_qty - tx.quantity);
+            }
             await supabase.from('packaging_materials').update({ stock_qty: newStock, lent_qty: newLent, total_qty: newStock + newLent }).eq('id', mat.id);
           }
           await supabase.from('packaging_transactions').delete().eq('reference_id', id);
@@ -379,18 +413,25 @@ function App() {
       const payload = {
         id: txId,
         material_id: newSale.consignedMaterialId,
-        type: 'SHIPPED_IN_SALE',
+        type: newSale.consignedType || 'SHIPPED_IN_SALE',
         quantity: newSale.consignedQuantity,
         client_id: clientId,
         reference_id: newSale.id,
         date: newSale.date,
-        notes: `Salida por despacho de fruta en venta ${newSale.id}`
+        notes: newSale.consignedType === 'RECEIVE_FROM_BUYER'
+          ? `Entrada por devolución de cajas de comprador en venta ${newSale.id}`
+          : `Salida por despacho de fruta en venta ${newSale.id}`
       };
       await supabase.from('packaging_transactions').insert([payload]);
 
       const mat = packagingMaterials.find(m => m.id === newSale.consignedMaterialId);
       if (mat) {
-        const newStock = Math.max(0, mat.stock_qty - newSale.consignedQuantity);
+        let newStock = mat.stock_qty;
+        if (payload.type === 'SHIPPED_IN_SALE') {
+          newStock = Math.max(0, mat.stock_qty - newSale.consignedQuantity);
+        } else if (payload.type === 'RECEIVE_FROM_BUYER') {
+          newStock = mat.stock_qty + newSale.consignedQuantity;
+        }
         await supabase
           .from('packaging_materials')
           .update({
@@ -467,7 +508,12 @@ function App() {
           const tx = txs[0];
           const mat = packagingMaterials.find(m => m.id === tx.material_id);
           if (mat) {
-            const newStock = mat.stock_qty + tx.quantity;
+            let newStock = mat.stock_qty;
+            if (tx.type === 'SHIPPED_IN_SALE') {
+              newStock = mat.stock_qty + tx.quantity;
+            } else if (tx.type === 'RECEIVE_FROM_BUYER') {
+              newStock = Math.max(0, mat.stock_qty - tx.quantity);
+            }
             await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
           }
           await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
@@ -519,7 +565,12 @@ function App() {
         const tx = txs[0];
         const mat = packagingMaterials.find(m => m.id === tx.material_id);
         if (mat) {
-          const newStock = mat.stock_qty + tx.quantity;
+          let newStock = mat.stock_qty;
+          if (tx.type === 'SHIPPED_IN_SALE') {
+            newStock = mat.stock_qty + tx.quantity;
+          } else if (tx.type === 'RECEIVE_FROM_BUYER') {
+            newStock = Math.max(0, mat.stock_qty - tx.quantity);
+          }
           await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
         }
         await supabase.from('packaging_transactions').delete().eq('reference_id', saleId);
@@ -534,12 +585,14 @@ function App() {
       const payload = {
         id: txId,
         material_id: updatedSale.consignedMaterialId,
-        type: 'SHIPPED_IN_SALE',
+        type: updatedSale.consignedType || 'SHIPPED_IN_SALE',
         quantity: updatedSale.consignedQuantity,
         client_id: clientId,
         reference_id: saleId,
         date: updatedSale.date,
-        notes: `Salida por despacho de fruta en venta ${saleId} (Editado)`
+        notes: updatedSale.consignedType === 'RECEIVE_FROM_BUYER'
+          ? `Entrada por devolución de cajas de comprador en venta ${saleId} (Editado)`
+          : `Salida por despacho de fruta en venta ${saleId} (Editado)`
       };
       await supabase.from('packaging_transactions').insert([payload]);
 
@@ -547,7 +600,12 @@ function App() {
       const { data: freshMats } = await supabase.from('packaging_materials').select('*').eq('id', updatedSale.consignedMaterialId);
       if (freshMats && freshMats.length > 0) {
         const mat = freshMats[0];
-        const newStock = Math.max(0, mat.stock_qty - updatedSale.consignedQuantity);
+        let newStock = mat.stock_qty;
+        if (payload.type === 'SHIPPED_IN_SALE') {
+          newStock = Math.max(0, mat.stock_qty - updatedSale.consignedQuantity);
+        } else if (payload.type === 'RECEIVE_FROM_BUYER') {
+          newStock = mat.stock_qty + updatedSale.consignedQuantity;
+        }
         await supabase.from('packaging_materials').update({ stock_qty: newStock, total_qty: newStock + mat.lent_qty }).eq('id', mat.id);
       }
     }
@@ -601,7 +659,8 @@ function App() {
             status: finalSale.status,
             isConsigned: finalSale.isConsigned,
             consignedMaterialId: finalSale.consignedMaterialId,
-            consignedQuantity: finalSale.consignedQuantity
+            consignedQuantity: finalSale.consignedQuantity,
+            consignedType: finalSale.consignedType
           })
           .eq('id', saleId)
           .then(({ error: sErr }) => {

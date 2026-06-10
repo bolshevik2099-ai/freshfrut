@@ -26,6 +26,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [isConsigned, setIsConsigned] = useState(false);
   const [consignedMaterialId, setConsignedMaterialId] = useState('');
   const [consignedQuantity, setConsignedQuantity] = useState('');
+  const [consignedType, setConsignedType] = useState('RETURNED_IN_PURCHASE');
 
   // Modal states
   const [activeModal, setActiveModal] = useState(null);
@@ -107,6 +108,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
   const [editIsConsigned, setEditIsConsigned] = useState(false);
   const [editConsignedMaterialId, setEditConsignedMaterialId] = useState('');
   const [editConsignedQuantity, setEditConsignedQuantity] = useState(0);
+  const [editConsignedType, setEditConsignedType] = useState('RETURNED_IN_PURCHASE');
 
   const varietiesByBerry = {
     'Fresa': ['Albion', 'Camino Real', 'Festival'],
@@ -135,8 +137,8 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       return;
     }
 
-    if (isConsigned && (!consignedMaterialId || !consignedQuantity)) {
-      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+    if (isConsigned && (!consignedMaterialId || !consignedQuantity || !consignedType)) {
+      alert("Por favor selecciona el tipo de caja, la cantidad de material consignado y el tipo de movimiento.");
       return;
     }
 
@@ -158,7 +160,8 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       qcData: null,
       isConsigned,
       consignedMaterialId: isConsigned ? consignedMaterialId : null,
-      consignedQuantity: isConsigned ? parseInt(consignedQuantity) : null
+      consignedQuantity: isConsigned ? parseInt(consignedQuantity) : null,
+      consignedType: isConsigned ? consignedType : null
     };
 
     addPurchase(newPurchase, isCredit === 'SI');
@@ -174,6 +177,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     setIsConsigned(false);
     setConsignedMaterialId('');
     setConsignedQuantity('');
+    setConsignedType('RETURNED_IN_PURCHASE');
 
     setTimeout(() => {
       setIsSuccess(false);
@@ -194,6 +198,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
     setEditIsConsigned(item.isConsigned || false);
     setEditConsignedMaterialId(item.consignedMaterialId || '');
     setEditConsignedQuantity(item.consignedQuantity || 0);
+    setEditConsignedType(item.consignedType || 'RETURNED_IN_PURCHASE');
     setActiveModal('edit');
   };
 
@@ -208,8 +213,8 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       return;
     }
 
-    if (editIsConsigned && (!editConsignedMaterialId || !editConsignedQuantity)) {
-      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+    if (editIsConsigned && (!editConsignedMaterialId || !editConsignedQuantity || !editConsignedType)) {
+      alert("Por favor selecciona el tipo de caja, la cantidad de material consignado y el tipo de movimiento.");
       return;
     }
 
@@ -220,7 +225,8 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
       storageLocation: editStorageLocation,
       isConsigned: editIsConsigned,
       consignedMaterialId: editIsConsigned ? editConsignedMaterialId : null,
-      consignedQuantity: editIsConsigned ? parseInt(editConsignedQuantity) : null
+      consignedQuantity: editIsConsigned ? parseInt(editConsignedQuantity) : null,
+      consignedType: editIsConsigned ? editConsignedType : null
     };
 
     editPurchase(selectedItem.id, updatedLot);
@@ -563,6 +569,18 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                     border: '1px dashed var(--panel-border)',
                     animation: 'fadeIn 0.2s ease-out'
                   }} className="form-row-responsive">
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Tipo de Movimiento</label>
+                      <select
+                        className="form-select"
+                        value={consignedType}
+                        onChange={(e) => setConsignedType(e.target.value)}
+                        required
+                      >
+                        <option value="RETURNED_IN_PURCHASE">Productor nos regresa cajas (Cosecha/Lotes llenos)</option>
+                        <option value="LEND_TO_PRODUCER">Estamos prestando cajas vacías al productor</option>
+                      </select>
+                    </div>
                     <div className="form-group">
                       <label className="form-label">Seleccionar Caja Consignada</label>
                       <select
@@ -650,6 +668,7 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                   <div style={{ fontWeight: 700, color: 'var(--color-blueberry)', marginBottom: '2px' }}>Material Consignado (Cajas):</div>
                   <div>Tipo de Caja: <strong>{packagingMaterials.find(m => m.id === selectedItem.consignedMaterialId)?.name || 'Caja Consignada'}</strong></div>
                   <div>Cantidad: <strong>{selectedItem.consignedQuantity} cajas</strong></div>
+                  <div>Movimiento: <strong>{selectedItem.consignedType === 'LEND_TO_PRODUCER' ? 'Cajas prestadas al productor (Préstamo)' : 'Cajas devueltas por el productor (Cosecha)'}</strong></div>
                 </div>
               )}
               {selectedItem.qcData && (
@@ -722,6 +741,18 @@ export default function PurchaseForm({ purchases, addPurchase, deletePurchase, e
                     borderRadius: '8px',
                     border: '1px dashed var(--panel-border)'
                   }} className="form-row-responsive">
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Tipo de Movimiento</label>
+                      <select
+                        className="form-select"
+                        value={editConsignedType}
+                        onChange={(e) => setEditConsignedType(e.target.value)}
+                        required
+                      >
+                        <option value="RETURNED_IN_PURCHASE">Productor nos regresa cajas (Cosecha/Lotes llenos)</option>
+                        <option value="LEND_TO_PRODUCER">Estamos prestando cajas vacías al productor</option>
+                      </select>
+                    </div>
                     <div className="form-group">
                       <label className="form-label">Seleccionar Caja Consignada</label>
                       <select

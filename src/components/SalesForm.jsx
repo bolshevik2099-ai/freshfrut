@@ -32,6 +32,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
   const [isConsigned, setIsConsigned] = useState(false);
   const [consignedMaterialId, setConsignedMaterialId] = useState('');
   const [consignedQuantity, setConsignedQuantity] = useState('');
+  const [consignedType, setConsignedType] = useState('SHIPPED_IN_SALE');
 
   // Modal states
   const [activeModal, setActiveModal] = useState(null); // 'details', 'edit'
@@ -114,6 +115,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
   const [editIsConsigned, setEditIsConsigned] = useState(false);
   const [editConsignedMaterialId, setEditConsignedMaterialId] = useState('');
   const [editConsignedQuantity, setEditConsignedQuantity] = useState(0);
+  const [editConsignedType, setEditConsignedType] = useState('SHIPPED_IN_SALE');
 
   const selectedLot = purchases.find(p => p.id === selectedLotId);
 
@@ -140,8 +142,8 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
       return;
     }
 
-    if (isConsigned && (!consignedMaterialId || !consignedQuantity)) {
-      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+    if (isConsigned && (!consignedMaterialId || !consignedQuantity || !consignedType)) {
+      alert("Por favor selecciona el tipo de caja, la cantidad de material consignado y el tipo de movimiento.");
       return;
     }
 
@@ -166,7 +168,8 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
       date: getLocalDateString(),
       isConsigned,
       consignedMaterialId: isConsigned ? consignedMaterialId : null,
-      consignedQuantity: isConsigned ? parseInt(consignedQuantity) : null
+      consignedQuantity: isConsigned ? parseInt(consignedQuantity) : null,
+      consignedType: isConsigned ? consignedType : null
     };
 
     addSale(newSale, isCredit === 'SI');
@@ -182,6 +185,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
     setIsConsigned(false);
     setConsignedMaterialId('');
     setConsignedQuantity('');
+    setConsignedType('SHIPPED_IN_SALE');
 
     const updatedLot = purchases.find(p => p.id === selectedLotId);
     const updatedRemaining = updatedLot ? (updatedLot.remainingKg - finalKg) : 0;
@@ -214,6 +218,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
     setEditIsConsigned(item.isConsigned || false);
     setEditConsignedMaterialId(item.consignedMaterialId || '');
     setEditConsignedQuantity(item.consignedQuantity || 0);
+    setEditConsignedType(item.consignedType || 'SHIPPED_IN_SALE');
     setActiveModal('edit');
   };
 
@@ -228,8 +233,8 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
       return;
     }
 
-    if (editIsConsigned && (!editConsignedMaterialId || !editConsignedQuantity)) {
-      alert("Por favor selecciona el tipo de caja y la cantidad de material consignado.");
+    if (editIsConsigned && (!editConsignedMaterialId || !editConsignedQuantity || !editConsignedType)) {
+      alert("Por favor selecciona el tipo de caja, la cantidad de material consignado y el tipo de movimiento.");
       return;
     }
 
@@ -243,6 +248,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
       isConsigned: editIsConsigned,
       consignedMaterialId: editIsConsigned ? editConsignedMaterialId : null,
       consignedQuantity: editIsConsigned ? parseInt(editConsignedQuantity) : null,
+      consignedType: editIsConsigned ? editConsignedType : null,
       date: selectedItem.date // Preserve date for re-apply logic
     };
 
@@ -649,20 +655,32 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                         border: '1px dashed var(--panel-border)',
                         animation: 'fadeIn 0.2s ease-out'
                       }} className="form-row-responsive">
-                        <div className="form-group">
-                          <label className="form-label">Seleccionar Caja Consignada</label>
-                          <select
-                            className="form-select"
-                            value={consignedMaterialId}
-                            onChange={(e) => setConsignedMaterialId(e.target.value)}
-                            required
-                          >
-                            <option value="">-- Elige un material --</option>
-                            {packagingMaterials.map(m => (
-                              <option key={m.id} value={m.id}>{m.name}</option>
-                            ))}
-                          </select>
-                        </div>
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Tipo de Movimiento</label>
+                      <select
+                        className="form-select"
+                        value={consignedType}
+                        onChange={(e) => setConsignedType(e.target.value)}
+                        required
+                      >
+                        <option value="SHIPPED_IN_SALE">Despachar cajas al comprador (Venta de fruta)</option>
+                        <option value="RECEIVE_FROM_BUYER">Comprador nos devuelve cajas vacías</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Seleccionar Caja Consignada</label>
+                      <select
+                        className="form-select"
+                        value={consignedMaterialId}
+                        onChange={(e) => setConsignedMaterialId(e.target.value)}
+                        required
+                      >
+                        <option value="">-- Elige un material --</option>
+                        {packagingMaterials.map(m => (
+                          <option key={m.id} value={m.id}>{m.name}</option>
+                        ))}
+                      </select>
+                    </div>
                         <div className="form-group">
                           <label className="form-label">Cantidad de Cajas</label>
                           <input
@@ -742,6 +760,7 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                   <div style={{ fontWeight: 700, color: 'var(--color-blueberry)', marginBottom: '2px' }}>Material Consignado (Cajas):</div>
                   <div>Tipo de Caja: <strong>{packagingMaterials.find(m => m.id === selectedItem.consignedMaterialId)?.name || 'Caja Consignada'}</strong></div>
                   <div>Cantidad: <strong>{selectedItem.consignedQuantity} cajas</strong></div>
+                  <div>Movimiento: <strong>{selectedItem.consignedType === 'RECEIVE_FROM_BUYER' ? 'Comprador regresa cajas vacías (Retorno)' : 'Cajas despachadas al comprador (Venta)'}</strong></div>
                 </div>
               )}
             </div>
@@ -830,6 +849,18 @@ export default function SalesForm({ purchases, sales, addSale, updatePurchaseSal
                     borderRadius: '8px',
                     border: '1px dashed var(--panel-border)'
                   }} className="form-row-responsive">
+                    <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                      <label className="form-label">Tipo de Movimiento</label>
+                      <select
+                        className="form-select"
+                        value={editConsignedType}
+                        onChange={(e) => setEditConsignedType(e.target.value)}
+                        required
+                      >
+                        <option value="SHIPPED_IN_SALE">Despachar cajas al comprador (Venta de fruta)</option>
+                        <option value="RECEIVE_FROM_BUYER">Comprador nos devuelve cajas vacías</option>
+                      </select>
+                    </div>
                     <div className="form-group">
                       <label className="form-label">Seleccionar Caja Consignada</label>
                       <select
