@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
-  /* Color Palette - Premium Chilled Refrigerator Theme (Cold Light Mode) */
-  --bg-main: #bfdbfe; /* clean, chilled soft medium light blue */
-  --bg-gradient: linear-gradient(135deg, #93c5fd 0%, #bfdbfe 50%, #dbeafe 100%); /* richer, slightly darker light blue gradient */
-  --panel-bg: rgba(255, 255, 255, 0.72); /* frosty semi-transparent glass shelf */
-  --panel-border: rgba(15, 23, 42, 0.08); /* slightly darker sharp white-blue border */
-  --panel-border-glow: rgba(30, 58, 138, 0.15); /* chilled navy blue edge glow */
+  /* Color Palette - Premium Blackberry & Midnight Glow (Dark Mode Redesign) */
+  --bg-main: #080c16; /* Deep Midnight Blue background */
+  --bg-gradient: linear-gradient(135deg, #030712 0%, #080c16 50%, #0f172a 100%); /* Gorgeous dark navy gradient */
+  --panel-bg: rgba(13, 17, 28, 0.72); /* Glassmorphism translucent dark slate panels */
+  --panel-border: rgba(255, 255, 255, 0.08); /* Frosted semi-transparent white border */
+  --panel-border-glow: rgba(59, 130, 246, 0.12); /* Sleek neon blue edge glow */
   
-  --color-strawberry: #e11d48; /* vibrant strawberry red */
-  --color-strawberry-hover: #be123c; /* deep berry red */
-  --color-blueberry: #1e3a8a; /* deep royal/navy blueberry blue */
-  --color-blueberry-dark: #0f172a; /* very dark navy blue (almost black) */
-  --color-raspberry: #db2777; /* vivid raspberry pink */
-  --color-blackberry: #4f46e5; /* indigo grape purple */
+  --color-strawberry: #f43f5e; /* Vibrant neon strawberry rose */
+  --color-strawberry-hover: #e11d48; /* Solid berry rose */
+  --color-blueberry: #3b82f6; /* Electric blueberry blue */
+  --color-blueberry-dark: #1d4ed8; /* Electric blue hover */
+  --color-raspberry: #ec4899; /* Vivid neon raspberry pink */
+  --color-blackberry: #6366f1; /* Indigo grape purple */
   
-  --color-success: #10b981; /* fresh lime/mint green */
-  --color-warning: #f97316; /* juicy orange */
-  --color-danger: #ef4444; /* cold cherry red */
+  --color-success: #34d399; /* Fresh neon emerald/mint green */
+  --color-warning: #fb923c; /* Juicy neon orange */
+  --color-danger: #f87171; /* Bright cherry red */
   
-  --text-primary: #090d16; /* very dark slate navy for high contrast text */
-  --text-secondary: #1e293b; /* dark slate gray */
-  --text-muted: #475569; /* steel gray */
+  --text-primary: #f8fafc; /* Silver-white text for high readability */
+  --text-secondary: #cbd5e1; /* Cool silver slate gray */
+  --text-muted: #64748b; /* Cool muted steel gray */
   
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-title: 'Outfit', sans-serif;
@@ -29,9 +29,11 @@
   --transition-fast: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-normal: 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   
-  --shadow-glow-strawberry: 0 8px 32px rgba(225, 29, 72, 0.15);
-  --shadow-glow-success: 0 8px 32px rgba(16, 185, 129, 0.15);
-  --shadow-glow-blue: 0 8px 32px rgba(30, 58, 138, 0.15);
+  --shadow-glow-strawberry: 0 8px 32px rgba(244, 63, 94, 0.22);
+  --shadow-glow-success: 0 8px 32px rgba(52, 211, 153, 0.22);
+  --shadow-glow-blue: 0 8px 32px rgba(59, 130, 246, 0.22);
+
+  --donut-hole-bg: #0d111c; /* Solid dark background matching the panel for donut chart inner hole */
 }
 
 * {
@@ -57,24 +59,24 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.03);
+  background: rgba(255, 255, 255, 0.02);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.12);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.22);
+  background: rgba(255, 255, 255, 0.25);
 }
 
 /* Glassmorphism Panel */
 .glass-panel {
   background: var(--panel-bg);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--panel-border);
   border-radius: 16px;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03), inset 0 1px 1px rgba(255, 255, 255, 0.8), 0 0 0 1px var(--panel-border-glow);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 0 0 1px var(--panel-border-glow);
 }
 
 /* App Layout */
@@ -98,7 +100,7 @@ body {
 @media (max-width: 1024px) {
   .sidebar {
     transform: translateX(-100%);
-    box-shadow: 0 0 40px rgba(15, 23, 42, 0.15) !important;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5) !important;
   }
   .sidebar.mobile-open {
     transform: translateX(0);
@@ -132,10 +134,10 @@ h1 {
 }
 
 .text-gradient-strawberry {
-  background: linear-gradient(135deg, #0f172a 20%, #2563eb 60%, var(--color-strawberry) 100%);
+  background: linear-gradient(135deg, #f8fafc 20%, #3b82f6 60%, var(--color-strawberry) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 0 40px rgba(56, 189, 248, 0.15);
+  text-shadow: 0 0 40px rgba(59, 130, 246, 0.25);
 }
 
 /* Status Badges */
@@ -152,21 +154,21 @@ h1 {
 }
 
 .badge-success {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(52, 211, 153, 0.1);
   color: var(--color-success);
-  border: 1px solid rgba(16, 185, 129, 0.25);
+  border: 1px solid rgba(52, 211, 153, 0.25);
 }
 
 .badge-warning {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(251, 146, 60, 0.1);
   color: var(--color-warning);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  border: 1px solid rgba(251, 146, 60, 0.25);
 }
 
 .badge-danger {
-  background: rgba(239, 68, 68, 0.1);
+  background: rgba(248, 113, 113, 0.1);
   color: var(--color-danger);
-  border: 1px solid rgba(239, 68, 68, 0.25);
+  border: 1px solid rgba(248, 113, 113, 0.25);
 }
 
 .badge-blue {
@@ -182,8 +184,8 @@ h1 {
 
 .card-hover:hover {
   transform: translateY(-4px);
-  border-color: rgba(96, 108, 56, 0.3);
-  box-shadow: var(--shadow-glow-strawberry);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: var(--shadow-glow-blue);
 }
 
 .btn-primary {
@@ -199,7 +201,7 @@ h1 {
   align-items: center;
   gap: 8px;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.2);
+  box-shadow: 0 4px 14px rgba(244, 63, 94, 0.2);
 }
 
 .btn-primary:hover {
@@ -209,7 +211,7 @@ h1 {
 }
 
 .btn-secondary {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
   border: 1px solid var(--panel-border);
   padding: 10px 20px;
@@ -220,8 +222,8 @@ h1 {
 }
 
 .btn-secondary:hover {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Form Styles */
@@ -238,7 +240,7 @@ h1 {
 }
 
 .form-input, .form-select, .form-textarea {
-  background: #ffffff;
+  background: rgba(15, 23, 42, 0.4);
   border: 1px solid var(--panel-border);
   border-radius: 8px;
   padding: 10px 14px;
@@ -250,8 +252,9 @@ h1 {
 
 .form-input:focus, .form-select:focus, .form-textarea:focus {
   outline: none;
-  border-color: var(--color-strawberry);
-  box-shadow: 0 0 0 2px rgba(96, 108, 56, 0.15);
+  border-color: var(--color-blueberry);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+  background: rgba(15, 23, 42, 0.6);
 }
 
 /* Pulsing Status Dot */

@@ -822,7 +822,7 @@ function App() {
         padding: '0 16px',
         borderRadius: 0,
         borderBottom: '1px solid var(--panel-border)',
-        background: 'rgba(255,255,255,0.7)',
+        background: 'var(--panel-bg)',
         backdropFilter: 'blur(20px)'
       }}>
         <button 
@@ -867,7 +867,7 @@ function App() {
             borderRadius: '12px',
             background: 'var(--panel-bg)',
             border: '1px solid var(--panel-border)',
-            boxShadow: '0 4px 15px rgba(30, 58, 138, 0.03)',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
             backdropFilter: 'blur(10px)',
             fontSize: '0.85rem',
             color: 'var(--text-primary)',
@@ -879,7 +879,7 @@ function App() {
               <span className="pulse-dot" style={{ width: '8px', height: '8px', backgroundColor: lastOperatorActivity ? 'var(--color-success)' : 'var(--color-warning)' }}></span>
               <strong>Seguimiento de Operador:</strong> {lastOperatorActivity ? `Última actividad el ${lastOperatorActivity}` : 'Sin actividad reciente registrada (operador aún no ha ingresado)'}
             </span>
-            <span className="badge badge-blue" style={{ padding: '4px 10px', fontSize: '0.7rem', textTransform: 'none', background: 'rgba(30, 58, 138, 0.05)', color: 'var(--color-blueberry)', border: '1px solid rgba(30, 58, 138, 0.15)' }}>
+            <span className="badge badge-blue" style={{ padding: '4px 10px', fontSize: '0.7rem', textTransform: 'none', background: 'rgba(59, 130, 246, 0.1)', color: 'var(--color-blueberry)', border: '1px solid rgba(59, 130, 246, 0.25)' }}>
               Modo Administrador
             </span>
           </div>

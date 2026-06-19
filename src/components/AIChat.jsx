@@ -350,7 +350,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             borderRadius: '9999px',
             fontSize: '0.8rem',
             fontWeight: 600,
-            boxShadow: '0 4px 15px rgba(30, 58, 138, 0.1)',
+            boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
             border: '1px solid var(--panel-border)',
             zIndex: 10000,
             cursor: 'pointer',
@@ -413,7 +413,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             boxShadow: '0 12px 40px rgba(0, 0, 0, 0.18)',
             border: '1px solid var(--panel-border)',
             borderRadius: '16px',
-            background: 'rgba(255, 255, 255, 0.88)',
+            background: 'rgba(15, 23, 42, 0.85)',
             backdropFilter: 'blur(30px) saturate(140%)',
             maxWidth: 'calc(100vw - 48px)',
             maxHeight: 'calc(100vh - 140px)',
@@ -427,7 +427,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.3)',
+            background: 'rgba(0, 0, 0, 0.15)',
             flexShrink: 0
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -562,10 +562,10 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
                   <div style={{
                     padding: '10px 14px',
                     borderRadius: isUser ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
-                    backgroundColor: isUser ? 'var(--color-strawberry)' : 'rgba(255, 255, 255, 0.95)',
+                    backgroundColor: isUser ? 'var(--color-strawberry)' : 'rgba(255, 255, 255, 0.05)',
                     border: isUser ? 'none' : '1px solid var(--panel-border)',
                     color: isUser ? 'white' : 'var(--text-primary)',
-                    boxShadow: isUser ? '0 4px 14px rgba(225, 29, 72, 0.18)' : '0 2px 10px rgba(0,0,0,0.02)',
+                    boxShadow: isUser ? '0 4px 14px rgba(244, 63, 94, 0.2)' : '0 2px 10px rgba(0,0,0,0.2)',
                     fontSize: '0.9rem'
                   }}>
                     {isUser ? (
@@ -586,7 +586,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
                 gap: '8px',
                 padding: '10px 14px',
                 borderRadius: '12px',
-                backgroundColor: 'rgba(0,0,0,0.02)',
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
                 border: '1px solid var(--panel-border)',
                 alignSelf: 'flex-start',
                 width: 'fit-content'
@@ -627,7 +627,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
                         cursor: 'pointer',
                         border: '1px solid var(--panel-border)',
                         borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.5)',
+                        background: 'rgba(255, 255, 255, 0.03)',
                         width: '100%'
                       }}
                     >
@@ -645,7 +645,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
           <form onSubmit={handleSend} style={{
             padding: '12px 16px',
             borderTop: '1px solid var(--panel-border)',
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            backgroundColor: 'rgba(13, 17, 28, 0.9)',
             backdropFilter: 'blur(20px)',
             display: 'flex',
             gap: '8px',

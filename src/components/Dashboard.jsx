@@ -229,7 +229,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
             width: '40px',
             height: '40px',
             borderRadius: '10px',
-            background: 'rgba(96, 108, 56, 0.1)',
+            background: 'rgba(244, 63, 94, 0.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -308,7 +308,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Fruta Ingresada (Compras)
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(96, 108, 56, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.12)', color: 'var(--color-strawberry)' }}>
               <ShoppingCart size={20} />
             </div>
           </div>
@@ -364,7 +364,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Total Gastos Operativos
             </span>
-            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(96, 108, 56, 0.1)', color: 'var(--color-strawberry)' }}>
+            <div style={{ padding: '8px', borderRadius: '8px', background: 'rgba(244, 63, 94, 0.12)', color: 'var(--color-strawberry)' }}>
               <Wallet size={20} />
             </div>
           </div>
@@ -382,7 +382,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
         </div>
 
         {/* KPI 5: Utilidad Neta */}
-        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(16, 185, 129, 0.08)' : '0 8px 30px rgba(96, 108, 56, 0.08)' }}>
+        <div className="glass-panel card-hover" style={{ padding: '24px', boxShadow: netProfit >= 0 ? '0 8px 30px rgba(52, 211, 153, 0.15)' : '0 8px 30px rgba(244, 63, 94, 0.15)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: 600, textTransform: 'uppercase' }}>
               Utilidad Neta Ajustada
@@ -390,7 +390,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
             <div style={{
               padding: '8px',
               borderRadius: '8px',
-              background: netProfit >= 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(96, 108, 56, 0.15)',
+              background: netProfit >= 0 ? 'rgba(52, 211, 153, 0.12)' : 'rgba(244, 63, 94, 0.12)',
               color: netProfit >= 0 ? 'var(--color-success)' : 'var(--color-strawberry)'
             }}>
               <ArrowUpRight size={20} />
@@ -447,7 +447,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
           gap: '20px'
         }}>
           {/* Cuentas por Cobrar */}
-          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+          <div style={{ padding: '16px', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
                 Por Cobrar (Clientes B2B)
@@ -465,7 +465,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
           </div>
 
           {/* Cuentas por Pagar */}
-          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+          <div style={{ padding: '16px', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
                 Por Pagar (Productores)
@@ -483,7 +483,7 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
           </div>
 
           {/* Balance Financiero Neto */}
-          <div style={{ padding: '16px', background: 'rgba(255, 255, 255, 0.4)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
+          <div style={{ padding: '16px', background: 'var(--panel-bg)', border: '1px solid var(--panel-border)', borderRadius: '12px' }} className="card-hover">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>
                 Balance de Cartera Neto
@@ -762,12 +762,12 @@ export default function Dashboard({ purchases, sales, expenses = [], debts = [],
                 width: '105px',
                 height: '105px',
                 borderRadius: '50%',
-                background: '#ffffff',
+                background: 'var(--donut-hole-bg)',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: 'inset 0 3px 8px rgba(30, 58, 138, 0.08)'
+                boxShadow: 'inset 0 3px 8px rgba(0, 0, 0, 0.6)'
               }}>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.05em' }}>GASTOS</span>
                 <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-strawberry-hover)', marginTop: '2px', fontFamily: 'var(--font-sans)' }}>

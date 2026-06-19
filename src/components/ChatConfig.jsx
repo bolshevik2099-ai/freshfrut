@@ -287,7 +287,7 @@ export default function ChatConfig() {
               width: '100%',
               fontWeight: 600,
               borderColor: 'var(--panel-border)',
-              backgroundColor: 'rgba(0,0,0,0.02)'
+              backgroundColor: 'rgba(255, 255, 255, 0.04)'
             }}
           >
             {testStatus === 'loading' ? (
@@ -312,15 +312,15 @@ export default function ChatConfig() {
                 animation: 'fadeIn 0.2s ease',
                 backgroundColor: 
                   testStatus === 'success' 
-                    ? 'rgba(96, 108, 56, 0.1)' 
+                    ? 'rgba(52, 211, 153, 0.1)' 
                     : testStatus === 'error' 
-                      ? 'rgba(176, 80, 18, 0.1)' 
-                      : 'rgba(0,0,0,0.02)',
+                      ? 'rgba(251, 146, 60, 0.1)' 
+                      : 'rgba(255, 255, 255, 0.02)',
                 border: 
                   testStatus === 'success' 
-                    ? '1px solid rgba(96, 108, 56, 0.3)' 
+                    ? '1px solid rgba(52, 211, 153, 0.25)' 
                     : testStatus === 'error' 
-                      ? '1px solid rgba(176, 80, 18, 0.3)' 
+                      ? '1px solid rgba(251, 146, 60, 0.25)' 
                       : '1px solid var(--panel-border)',
                 color: 
                   testStatus === 'success' 
@@ -344,7 +344,7 @@ export default function ChatConfig() {
       </div>
 
       {/* Historial de Consultas de IA (Auditoría) */}
-      <div className="glass-panel animate-slide-up" style={{ padding: '28px', marginTop: '24px', border: '1px solid var(--panel-border)', background: 'rgba(255, 255, 255, 0.45)', backdropFilter: 'blur(30px) saturate(150%)' }}>
+      <div className="glass-panel animate-slide-up" style={{ padding: '28px', marginTop: '24px', border: '1px solid var(--panel-border)', background: 'var(--panel-bg)', backdropFilter: 'blur(30px) saturate(150%)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--panel-border)', paddingBottom: '16px', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: 'linear-gradient(135deg, var(--color-blueberry) 0%, var(--color-blackberry) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
@@ -432,13 +432,13 @@ export default function ChatConfig() {
                       style={{ 
                         padding: '16px', 
                         borderRadius: '12px', 
-                        background: 'rgba(255,255,255,0.6)', 
+                        background: 'rgba(255,255,255,0.02)', 
                         border: '1px solid var(--panel-border)', 
                         display: 'flex', 
                         flexDirection: 'column', 
                         gap: '12px',
                         transition: 'transform 0.2s ease',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.01)'
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                       }}
                       className="card-hover"
                     >
@@ -466,7 +466,7 @@ export default function ChatConfig() {
 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           <span>F. Consulta: {formattedDate}</span>
-                          <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(0,0,0,0.03)', border: '1px solid var(--panel-border)' }}>
+                          <span style={{ padding: '2px 8px', borderRadius: '4px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--panel-border)' }}>
                             Modelo: {log.model}
                           </span>
                         </div>
@@ -477,7 +477,7 @@ export default function ChatConfig() {
                         {/* Question Column */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Pregunta del Usuario:</span>
-                          <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(0, 0, 0, 0.02)', border: '1px solid var(--panel-border)', fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', minHeight: '50px' }}>
+                          <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--panel-border)', fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', minHeight: '50px' }}>
                             {log.message}
                           </div>
                         </div>
@@ -485,7 +485,7 @@ export default function ChatConfig() {
                         {/* Reply Column */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Respuesta de la IA:</span>
-                          <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.8)', border: '1px solid var(--panel-border)', fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', minHeight: '50px' }}>
+                          <div style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--panel-border)', fontSize: '0.85rem', color: 'var(--text-primary)', whiteSpace: 'pre-wrap', minHeight: '50px' }}>
                             {log.reply}
                           </div>
                         </div>
@@ -517,7 +517,7 @@ export default function ChatConfig() {
                             <pre style={{
                               marginTop: '8px',
                               padding: '10px 14px',
-                              background: 'rgba(0,0,0,0.03)',
+                              background: 'rgba(255,255,255,0.03)',
                               border: '1px solid var(--panel-border)',
                               borderRadius: '8px',
                               fontSize: '0.75rem',

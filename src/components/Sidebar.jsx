@@ -28,14 +28,14 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       display: 'flex',
       flexDirection: 'column',
       borderRadius: 0,
-      background: 'rgba(255, 255, 255, 0.45)',
+      background: 'var(--panel-bg)',
       backdropFilter: 'blur(30px) saturate(150%)',
       borderRight: '1px solid var(--panel-border)',
       borderTop: 'none',
       borderLeft: 'none',
       borderBottom: 'none',
       padding: '12px 16px',
-      boxShadow: '0 0 20px rgba(56, 189, 248, 0.04)',
+      boxShadow: '0 0 40px rgba(0, 0, 0, 0.4)',
       transition: 'transform var(--transition-normal)'
     }}>
       {/* Mobile Close Button */}
@@ -99,8 +99,8 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
                 gap: '12px',
                 width: '100%',
                 padding: '8px 12px',
-                background: isActive ? 'rgba(30, 58, 138, 0.08)' : 'transparent',
-                color: isActive ? 'var(--color-blueberry-dark)' : 'var(--text-secondary)',
+                background: isActive ? 'rgba(59, 130, 246, 0.12)' : 'transparent',
+                color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
                 border: 'none',
                 borderRadius: '8px',
                 fontFamily: 'var(--font-sans)',
@@ -176,10 +176,10 @@ export default function Sidebar({ activeTab, setActiveTab, onLogout, userRole = 
       
       <style>{`
         .sidebar-item-hover:hover {
-          background: rgba(30, 58, 138, 0.08) !important;
-          color: var(--color-blueberry) !important;
+          background: rgba(59, 130, 246, 0.08) !important;
+          color: var(--text-primary) !important;
           padding-left: 20px !important;
-          box-shadow: inset 0 0 8px rgba(30, 58, 138, 0.04);
+          box-shadow: inset 0 0 8px rgba(59, 130, 246, 0.04);
         }
       `}</style>
     </aside>
