@@ -41,29 +41,24 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
   }, [messages, loading, isOpen]);
 
   const [aiConfig, setAiConfig] = useState({
-    apiKey: localStorage.getItem('deepseek_api_key') || 'sk-1951afeabbfd4a04a3e06b0e0dbe5de5',
-    model: localStorage.getItem('deepseek_model') || 'deepseek-chat',
-    systemPrompt: localStorage.getItem('deepseek_system_prompt') || 
-      'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador y operador a analizar inventarios, deudas, ventas y gastos. Responde siempre en español de forma profesional y clara.'
+    model: 'deepseek-chat',
+    systemPrompt: 'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador y operador a analizar inventarios, deudas, ventas y gastos. Responde siempre en español de forma profesional y clara.',
+    hasApiKey: false
   });
 
   const loadDbConfig = async () => {
     try {
-      const { data, error } = await supabase.from('chat_config').select('*');
-      if (error) throw error;
-      if (data && data.length > 0) {
-        const keyVal = {};
-        data.forEach(item => {
-          keyVal[item.key] = item.value;
-        });
+      const response = await fetch('/api/config');
+      if (response.ok) {
+        const data = await response.json();
         setAiConfig({
-          apiKey: keyVal['deepseek_api_key'] || 'sk-1951afeabbfd4a04a3e06b0e0dbe5de5',
-          model: keyVal['deepseek_model'] || 'deepseek-chat',
-          systemPrompt: keyVal['deepseek_system_prompt'] || 'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador y operador a analizar inventarios, deudas, ventas y gastos. Responde siempre en español de forma profesional y clara.'
+          model: data.model || 'deepseek-chat',
+          systemPrompt: data.systemPrompt || 'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador y operador a analizar inventarios, deudas, ventas y gastos. Responde siempre en español de forma profesional y clara.',
+          hasApiKey: data.hasApiKey
         });
       }
     } catch (err) {
-      console.error("Error loading chat config from db:", err);
+      console.error("Error loading chat config from API:", err);
     }
   };
 
@@ -157,9 +152,9 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
 
     setMessages(prev => [...prev, userMessage]);
 
-    const { apiKey, model, systemPrompt } = aiConfig;
+    const { hasApiKey } = aiConfig;
 
-    if (!apiKey) {
+    if (!hasApiKey) {
       setMessages(prev => [
         ...prev,
         {
@@ -175,12 +170,8 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
 
     try {
       const dbContext = buildDatabaseContext();
-      const finalSystemMessage = `${systemPrompt}\n\n${dbContext}\n\nNota: Utiliza los datos de la base de datos anteriores para responder con números exactos. IMPORTANTE: Todas las cifras financieras en la base de datos (tanto compras, ventas, deudas, como gastos) están expresadas en Pesos Mexicanos (MXN). No realices conversiones de tipo de cambio ni asumas que las ventas a clientes extranjeros (como Walmart Inc (USA) o Driscoll's) están en dólares; todos los números representan MXN. Por lo tanto, puedes sumarlos y restarlos directamente sin aplicar ningún tipo de cambio para calcular las ganancias netas u otros totales.`;
-
-      // Build message array for API
-      // We limit context history to the last 10 messages to avoid token bloat
+      
       const apiMessages = [
-        { role: 'system', content: finalSystemMessage },
         ...messages.slice(-10).map(msg => ({
           role: msg.sender === 'user' ? 'user' : 'assistant',
           content: msg.text
@@ -188,50 +179,32 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
         { role: 'user', content: userMessageText }
       ];
 
-      const response = await fetch('https://api.deepseek.com/chat/completions', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: model,
           messages: apiMessages,
-          temperature: 0.3
+          dbContext: dbContext,
+          userEmail: userEmail || 'admin@tamfresh.com'
         })
       });
 
       if (response.ok) {
         const data = await response.json();
-        const choice = data?.choices?.[0]?.message;
-        const replyText = choice?.content || 'No se recibió respuesta.';
-        const reasoningText = choice?.reasoning_content || null; // DeepSeek R1 reasoning steps
-
         setMessages(prev => [
           ...prev,
           {
             sender: 'assistant',
-            text: replyText,
-            reasoning: reasoningText,
+            text: data.reply,
+            reasoning: data.reasoning,
             timestamp: new Date().toISOString()
           }
         ]);
-
-        // Insert log to Supabase Relational Database
-        const { error: logError } = await supabase.from('ai_chat_logs').insert([{
-          user_email: userEmail || 'admin@tamfresh.com',
-          message: userMessageText,
-          reply: replyText,
-          reasoning: reasoningText,
-          model: model
-        }]);
-
-        if (logError) {
-          console.error("Error inserting audit chat log to Supabase:", logError);
-        }
       } else {
         const errData = await response.json().catch(() => ({}));
-        const errMsg = errData?.error?.message || `Código HTTP ${response.status}`;
+        const errMsg = errData.error || `Código HTTP ${response.status}`;
         setMessages(prev => [
           ...prev,
           {
@@ -247,7 +220,7 @@ export default function AIChat({ purchases = [], sales = [], suppliers = [], cli
         ...prev,
         {
           sender: 'assistant',
-          text: `Error de red al conectar con DeepSeek: ${err.message}`,
+          text: `Error de red al conectar con el servidor: ${err.message}`,
           reasoning: null,
           timestamp: new Date().toISOString()
         }

@@ -49,25 +49,24 @@ export default function ChatConfig() {
 
   useEffect(() => {
     const loadConfig = async () => {
-      let savedKey = localStorage.getItem('deepseek_api_key') || 'sk-1951afeabbfd4a04a3e06b0e0dbe5de5';
-      let savedModel = localStorage.getItem('deepseek_model') || 'deepseek-chat';
-      let savedPrompt = localStorage.getItem('deepseek_system_prompt') || 
-        'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador a analizar inventarios, redactar correos a clientes y proveedores, y resolver dudas de logística o deudas. Responde siempre en español de forma profesional y clara.';
+      let savedKey = '';
+      let savedModel = 'deepseek-chat';
+      let savedPrompt = 'Eres un asistente de inteligencia artificial experto en la gestión de exportación de berries para Tamfresh. Ayudas al administrador a analizar inventarios, redactar correos a clientes y proveedores, y resolver dudas de logística o deudas. Responde siempre en español de forma profesional y clara.';
 
       try {
-        const { data, error } = await supabase.from('chat_config').select('*');
-        if (error) throw error;
-        if (data && data.length > 0) {
-          const keyVal = {};
-          data.forEach(item => {
-            keyVal[item.key] = item.value;
-          });
-          if (keyVal['deepseek_api_key']) savedKey = keyVal['deepseek_api_key'];
-          if (keyVal['deepseek_model']) savedModel = keyVal['deepseek_model'];
-          if (keyVal['deepseek_system_prompt']) savedPrompt = keyVal['deepseek_system_prompt'];
+        const response = await fetch('/api/config');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.hasApiKey) {
+            savedKey = '••••••••••••••••';
+          }
+          savedModel = data.model || 'deepseek-chat';
+          savedPrompt = data.systemPrompt || savedPrompt;
+        } else {
+          console.error('Failed to load chat config from API');
         }
       } catch (err) {
-        console.error('Error fetching chat config from Supabase:', err);
+        console.error('Error fetching chat config from API:', err);
       }
 
       setApiKey(savedKey);
@@ -87,30 +86,33 @@ export default function ChatConfig() {
     e.preventDefault();
     const finalModel = model === 'custom' ? customModel : model;
     
-    // Save to localStorage as a fallback
-    localStorage.setItem('deepseek_api_key', apiKey.trim());
-    localStorage.setItem('deepseek_model', finalModel.trim());
-    localStorage.setItem('deepseek_system_prompt', systemPrompt);
-    
     try {
-      const updates = [
-        { key: 'deepseek_api_key', value: apiKey.trim() },
-        { key: 'deepseek_model', value: finalModel.trim() },
-        { key: 'deepseek_system_prompt', value: systemPrompt }
-      ];
+      const response = await fetch('/api/config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: finalModel.trim(),
+          systemPrompt: systemPrompt,
+          apiKey: apiKey.trim()
+        })
+      });
 
-      for (const row of updates) {
-        const { error } = await supabase
-          .from('chat_config')
-          .upsert(row);
-        if (error) throw error;
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${response.status}`);
       }
       
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
+
+      if (apiKey.trim() && apiKey.trim() !== '••••••••••••••••') {
+        setApiKey('••••••••••••••••');
+      }
     } catch (err) {
-      console.error('Error saving chat config to Supabase:', err);
-      alert('Error al guardar la configuración en la base de datos: ' + err.message);
+      console.error('Error saving chat config:', err);
+      alert('Error al guardar la configuración: ' + err.message);
     }
   };
 
@@ -120,29 +122,31 @@ export default function ChatConfig() {
     const finalModel = model === 'custom' ? customModel : model;
 
     try {
-      const response = await fetch('https://api.deepseek.com/chat/completions', {
+      const payload = {
+        messages: [{ role: 'user', content: 'Di la palabra OK en mayusculas' }],
+        dbContext: '',
+        userEmail: 'admin@tamfresh.com'
+      };
+
+      if (apiKey.trim() && apiKey.trim() !== '••••••••••••••••') {
+        payload.tempApiKey = apiKey.trim();
+      }
+
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey.trim()}`
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          model: finalModel,
-          messages: [
-            { role: 'user', content: 'Di la palabra OK en mayusculas' }
-          ],
-          max_tokens: 5
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
         const data = await response.json();
-        const reply = data?.choices?.[0]?.message?.content || 'Conexión Exitosa';
         setTestStatus('success');
-        setTestMessage(`¡Conexión establecida correctamente! Respuesta de DeepSeek: "${reply.trim()}"`);
+        setTestMessage(`¡Conexión establecida correctamente! Respuesta de DeepSeek: "${data.reply.trim()}"`);
       } else {
         const errData = await response.json().catch(() => ({}));
-        const errText = errData?.error?.message || `Error HTTP ${response.status}`;
+        const errText = errData.error || `Error HTTP ${response.status}`;
         setTestStatus('error');
         setTestMessage(`Error de conexión: ${errText}`);
       }
